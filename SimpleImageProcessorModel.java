@@ -6,7 +6,7 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
   Image image;
 
   public SimpleImageProcessorModel(String filename) {
-    this.image = new Image(filename);
+    importImage(filename);
   }
 
 
@@ -29,12 +29,35 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
   }
 
   @Override
-  public void transformColor() {
-
+  public Image applyGreyscale() {
+    List<Double> redList = Arrays.asList(.2126,.7152,.0722);
+    List<Double> greenList = Arrays.asList(.2126,.7152,.0722);
+    List<Double> blueList = Arrays.asList(.2126,.7152,.0722);
+    CTMatrix matrix = new CTMatrix(redList,greenList,blueList);
+    Image finalImage = this.image.transformColor(matrix);
+    return finalImage;
   }
+
+  @Override
+  public Image applySepia() {
+    List<Double> redList = Arrays.asList(.393,.769,.189);
+    List<Double> greenList = Arrays.asList(.349,.686,.168);
+    List<Double> blueList = Arrays.asList(.272,.534,.131);
+    CTMatrix matrix = new CTMatrix(redList,greenList,blueList);
+    Image finalImage = this.image.transformColor(matrix);
+    return finalImage;
+  }
+
 
   @Override
   public Image createImage() {
     return null;
   }
+
+
+  @Override
+  public void importImage(String filename) {
+    this.image = new Image(filename);
+  }
+
 }

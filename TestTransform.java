@@ -21,11 +21,22 @@ public class TestTransform {
     List<Double> bluelist = Arrays.asList(.2126,.7152,.0722);
     CTMatrix matrix = new CTMatrix(redlist,greenlist,bluelist);
 
-    double before = this.image.pixelArray[200][200].color.red;
-    Image newImage = this.image.transformColor(matrix);
-    double after = newImage.pixelArray[200][200].color.red;
+    double redBefore = this.image.pixelArray[200][200].color.red;
+    double greenBefore = this.image.pixelArray[200][200].color.green;
+    double blueBefore = this.image.pixelArray[200][200].color.blue;
+    assertEquals(155,redBefore, .1);
+    assertEquals(142,greenBefore, .1);
+    assertEquals(136,blueBefore, .1);
 
-    assertEquals(after,before, .1);
+    Image newImage = this.image.transformColor(matrix);
+
+    double redAfter = newImage.pixelArray[200][200].color.red;
+    double greenAfter = newImage.pixelArray[200][200].color.green;
+    double blueAfter = newImage.pixelArray[200][200].color.blue;
+    assertEquals(144.3306,redAfter, .1);
+    assertEquals(144.3306,greenAfter, .1);
+    assertEquals(144.3306,blueAfter, .1);
+
 
   }
 }
