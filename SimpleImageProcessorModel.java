@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,10 +56,9 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
   }
 
   @Override
-  public Image createImage(int height, int width){
+  public Image createImage(int height, int width, int maxColor){
     Pixel[][] pixelArray = new Pixel[height][width];
 
-    int maxColor = 255;
     for (int row = 0; row < height; row++) {
       for (int col = 0; col < width; col++) {
 
@@ -96,6 +99,41 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
   @Override
   public void importImage(String filename) {
     this.image = new Image(filename);
+  }
+
+  @Override
+  public void exportImage(String fileName, String fileType){
+
+    File file;
+    String finalFileName = fileName + fileType;
+    FileOutputStream FStream = null;
+    String imageValues = this.image.getImageValues(finalFileName);
+
+    try {
+      file = new File(fileName + ".ppm");
+      FStream = new FileOutputStream(file);
+
+      if (!file.exists()) {
+        file.createNewFile();
+      }
+      byte[] bArray = imageValues.getBytes();
+
+      FStream.write(bArray);
+      FStream.flush ();
+    }
+
+    catch (IOException e) {
+      //
+    }
+
+    try {
+      if (FStream != null) {
+        FStream.close();
+      }
+    }
+    catch (IOException e) {
+      //
+    }
   }
 
 }

@@ -17,12 +17,31 @@ public class SimpleImageProcessorTest {
   @Test
   public void testCreateImage(){
 
-    Image newImage = model.createImage(500,500);
+    Image newImage = model.createImage(500,500,255);
 
 
     assertEquals (500, newImage.height);
-    assertEquals (255,newImage.maxColorVal );
+    assertEquals (255,newImage.maxColorVal);
     assertEquals (500,newImage.height);
-    assertEquals (117, newImage.pixelArray.length);
+    assertEquals (500, newImage.pixelArray.length);
+  }
+
+  @Test
+  public void testExport(){
+
+    SimpleImageProcessorModel model = new SimpleImageProcessorModel("Koala.ppm");
+
+    model.exportImage("KoalaAfter", ".ppm");
+
+
+    SimpleImageProcessorModel modelafter = new SimpleImageProcessorModel("KoalaAfter.ppm");
+
+    Image afterImage = modelafter.image;
+    assertEquals (500, afterImage.height);
+    assertEquals (255,afterImage.maxColorVal);
+    assertEquals (500,afterImage.height);
+    assertEquals (500, afterImage.pixelArray.length);
+
+
   }
 }

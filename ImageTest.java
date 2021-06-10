@@ -18,6 +18,17 @@ public class ImageTest {
     this.image = new Image("Koala.ppm");
   }
 
+
+  @Test
+  public void testCreateImage1() {
+
+    Image newImage = new Image("Koala.ppm");
+    String newStr = newImage.getImageValues ("afilename");
+
+    assertEquals(768,newStr);
+
+  }
+
   @Test
   public void testCreateImage() {
 
@@ -46,7 +57,7 @@ public class ImageTest {
     //int xBefore = this.image.pixels.get(0).x;
     //int yBefore = this.image.pixels.get(0).y;
 
-    assertEquals(pixArray.length, image.height * image.width);
+    assertEquals(pixArray.length, image.height);
 
   }
 
@@ -195,43 +206,8 @@ public class ImageTest {
     assertEquals (116.25, redAfter1,.1);
     assertEquals (100.875, greenAfter1,.1);
     assertEquals (77.0625, blueAfter1,.1);
-    //top row left
-    /*
-    //top row middle
-    double redAfter2 = newImage.pixelArray[49][50].color.red;
-    double greenAfter2 = newImage.pixelArray[49][50].color.green;
-    double blueAfter2 = newImage.pixelArray[49][50].color.blue;
-    //top row right
-    double redAfter3 = newImage.pixelArray[49][51].color.red;
-    double greenAfter3 = newImage.pixelArray[49][51].color.green;
-    double blueAfter3 = newImage.pixelArray[49][51].color.blue;
 
-    //middle row left
-    double redAfter11 = newImage.pixelArray[50][49].color.red;
-    double greenAfter11 = newImage.pixelArray[50][49].color.green;
-    double blueAfter11 = newImage.pixelArray[50][49].color.blue;
-    //middle row middle
-    double redAfter12 = newImage.pixelArray[50][50].color.red;
-    double greenAfter12 = newImage.pixelArray[50][50].color.green;
-    double blueAfter12 = newImage.pixelArray[50][50].color.blue;
-    //middle row right
-    double redAfter13 = newImage.pixelArray[50][51].color.red;
-    double greenAfter13 = newImage.pixelArray[50][51].color.green;
-    double blueAfter13 = newImage.pixelArray[50][51].color.blue;
 
-    //bottom row left
-    double redAfter21 = newImage.pixelArray[51][49].color.red;
-    double greenAfter21 = newImage.pixelArray[51][49].color.green;
-    double blueAfter21 = newImage.pixelArray[51][49].color.blue;
-    //bottom row middle
-    double redAfter22 = newImage.pixelArray[51][50].color.red;
-    double greenAfter22 = newImage.pixelArray[51][50].color.green;
-    double blueAfter22 = newImage.pixelArray[51][50].color.blue;
-    //bottom row right
-    double redAfter23 = newImage.pixelArray[51][51].color.red;
-    double greenAfter23 = newImage.pixelArray[51][51].color.green;
-    double blueAfter23 = newImage.pixelArray[51][51].color.blue;
-*/
 
 
 
