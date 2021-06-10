@@ -192,9 +192,9 @@ public class ImageTest {
     double redAfter1 = newImage.pixelArray[50][50].color.red;
     double greenAfter1 = newImage.pixelArray[50][50].color.green;
     double blueAfter1 = newImage.pixelArray[50][50].color.blue;
-    assertEquals (121, redAfter1,.1);
-    assertEquals (82, greenAfter1,.1);
-    assertEquals (105, blueAfter1,.1);
+    assertEquals (116.25, redAfter1,.1);
+    assertEquals (100.875, greenAfter1,.1);
+    assertEquals (77.0625, blueAfter1,.1);
     //top row left
     /*
     //top row middle

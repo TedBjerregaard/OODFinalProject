@@ -10,12 +10,14 @@ public class Image {
   int height;
   int width;
   int maxColorVal;
+  int minColorVal;
   Pixel[][] pixelArray;
 
   public Image(int height, int width, int maxColorVal, Pixel[][] pixelArray) {
     this.height = height;
     this.width = width;
     this.maxColorVal = maxColorVal;
+    this.minColorVal = 0;
     this.pixelArray = pixelArray;
   }
 
@@ -50,72 +52,84 @@ public class Image {
     int height = sc.nextInt();
     int maxValue = sc.nextInt();
 
-    List<Pixel> pixels = new ArrayList<> ();
-
-    for (int i=0;i<height;i++) {
-      for (int j=0;j<width;j++) {
-        int r = sc.nextInt();
-        int g = sc.nextInt();
-        int b = sc.nextInt();
-        Pixel toAdd = new Pixel (i,j,new PixelColor(r,g,b));
-        pixels.add (toAdd);
-      }
-    }
     this.height = height;
     this.width = width;
     this.maxColorVal = maxValue;
+    this.minColorVal = 0;
+
+    List<Pixel> pixels = new ArrayList<> ();
+
+    for (int row=0;row<height;row++) {
+      for (int col=0;col<width;col++) {
+        int r = sc.nextInt();
+        int g = sc.nextInt();
+        int b = sc.nextInt();
+        Pixel toAdd = new Pixel (row,col,new PixelColor(r,g,b, this.maxColorVal, this.minColorVal));
+        pixels.add (toAdd);
+      }
+    }
 
     int current = 0;
     this.pixelArray = new Pixel[height][width];
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        this.pixelArray[i][j] = pixels.get(current);
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        this.pixelArray[row][col] = pixels.get(current);
         current++;
       }
     }
   }
 
+  public Image transformColor(CTMatrix matrix) {
+    Pixel[][] newPixList = new Pixel[height][width];
+    for (int row = 0;  row < this.height; row++) {
+      for (int col = 0; col < this.width; col++) {
+        Pixel currentPixel  = this.pixelArray[row][col];
+
+        PixelColor newColor = currentPixel.getTransformedColor(matrix);
+        Pixel newPixel = new Pixel(currentPixel.x, currentPixel.y, newColor);
+        newPixList[row][col] = newPixel;
+      }
+    }
+    return new Image(this.height,this.width, this.maxColorVal, newPixList);
+  }
+
   public Image filter(Kernel kernel) {
     Pixel[][] newPixList = new Pixel[height][width];
 
-    for (int i = 0;  i < this.height; i++) {
-      for (int j = 0; j < this.width; j++) {
-        Pixel currentPixel  = this.pixelArray[i][j];
+    for (int row = 0;  row < this.height; row++) {
+      for (int col = 0; col < this.width; col++) {
+        Pixel currentPixel  = this.pixelArray[row][col];
 
         PixelColor newColor = getNewColor(currentPixel, kernel);
         Pixel newPixel = new Pixel(currentPixel.x, currentPixel.y, newColor);
-        newPixList[i][j] = newPixel;
+        newPixList[row][col] = newPixel;
       }
     }
 
     return new Image(this.height,this.width, this.maxColorVal, newPixList);
   }
 
+  //TODO: check this
   public PixelColor getNewColor(Pixel current, Kernel kernel) {
     double newRed = 0;
     double newGreen = 0;
     double newBlue = 0;
-    for ( int i = 0; i < kernel.size; i ++) {
-      for (int j = 0; j < kernel.size; j ++) {
-        int xValue = current.x + kernel.kArray[i][j][0];
-        int yValue = current.y + kernel.kArray[i][j][1];
-        if (pixelArray[i][j] != null) {
-          newRed += pixelArray[i][j].color.applyKernelRed(kernel.valuesArray[i][j]);
-          newGreen += pixelArray[i][j].color.applyKernelGreen(kernel.valuesArray[i][j]);
-          newBlue += pixelArray[i][j].color.applyKernelBlue(kernel.valuesArray[i][j]);
+    for ( int row = 0; row < kernel.size; row ++) {
+      for (int col = 0; col < kernel.size; col ++) {
+        int xValue = current.x + kernel.kArray[row][col][0];
+        int yValue = current.y + kernel.kArray[row][col][1];
+
+        if (xValue >= 0 && yValue >= 0 && xValue < height  && yValue < width) {
+          newRed += pixelArray[xValue][yValue].color.applyKernelRed(kernel.valuesArray[row][col]);
+          newGreen += pixelArray[xValue][yValue].color.applyKernelGreen(kernel.valuesArray[row][col]);
+          newBlue += pixelArray[xValue][yValue].color.applyKernelBlue(kernel.valuesArray[row][col]);
         }
       }
     }
-    if(newRed > maxColorVal) {
-      newRed = maxColorVal;
-    }
-    if(newGreen > maxColorVal) {
-      newGreen = maxColorVal;
-    }
-    if(newBlue > maxColorVal) {
-      newBlue = maxColorVal;
-    }
-    return new PixelColor (newRed,newGreen,newBlue);
+    return new PixelColor (newRed,newGreen,newBlue, this.maxColorVal, this.minColorVal);
   }
+
+
+
 
 }

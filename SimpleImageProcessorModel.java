@@ -9,6 +9,9 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     importImage(filename);
   }
 
+  public SimpleImageProcessorModel() {
+
+  }
 
   @Override
   public Image blur() {
@@ -48,11 +51,46 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     return finalImage;
   }
 
-
   @Override
-  public Image createImage() {
-    return null;
+  public Image createImage(int height, int width){
+    Pixel[][] pixelArray = new Pixel[height][width];
+
+    int maxColor = 255;
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+
+        int pixCount = 0;
+        while (pixCount <= 10) {
+          double red = 255;
+          double green = 0;
+          double blue = 0;
+          PixelColor color = new PixelColor(red, green, blue, maxColor,0);
+          Pixel newPix = new Pixel (col,row,color);
+          pixelArray[row][col] = newPix;
+          pixCount ++;
+        }
+        while (pixCount <= 20) {
+          double red = 0;
+          double green = 0;
+          double blue = 255;
+          PixelColor color = new PixelColor(red, green, blue, maxColor,0);
+          Pixel newPix = new Pixel (col,row,color);
+          pixelArray[row][col] = newPix;
+          pixCount ++;
+        }
+
+
+
+
+
+      }
+    }
+
+
+
+    return new Image(height,width,maxColor,pixelArray);
   }
+
 
 
   @Override

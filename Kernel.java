@@ -4,7 +4,6 @@ import java.util.List;
 public class Kernel {
 
   int size;
-  List<Double> values;
   double[][] valuesArray;
   int[][][] kArray;
 
@@ -30,33 +29,16 @@ public class Kernel {
         }
       }
 
-
-
       int buffer = size / 2;
 
-      int currentY = buffer;
-      while (currentY >= -buffer) {
-        for (int i = 0; i < size; i ++) { //i represents the rows
-          int currentX = -buffer;
-          while (currentX <= buffer) {
-            for (int j = 0; j < size; j++) { //j represents the columns
-
-              kArray[i][j] = new int[] {currentX, currentY};
-              currentX += 1;
-            }
-          }
-          currentY += -1;
-
-
+      for (int row = -buffer; row <= buffer; row++) {
+        for (int col = -buffer; col <= buffer; col++) {
+          int i = row + buffer;
+          int j = col + buffer;
+          kArray[i][j] = new int[] {row, col};
         }
       }
     }
-
-
-
-
   }
-
-
 
 }
