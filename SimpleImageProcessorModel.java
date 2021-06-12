@@ -56,42 +56,45 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
   }
 
   @Override
-  public Image createImage(int height, int width, int maxColor){
-    Pixel[][] pixelArray = new Pixel[height][width];
+  public Image createImage(int sizeOfSquare, int sizeBoard, int maxColor) {
+    int side = sizeBoard * sizeOfSquare;
+    int side2 = side * 1;
+    Pixel[][] pixelArray = new Pixel[side][side2];
 
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
+    int pixCountX = 0;
+    for (int row = 0; row < side; row++) {
 
-        int pixCount = 0;
-        while (pixCount <= 10) {
+      for (int col = 0; col < side; col++) {
+
+        int pixCountY = 0;
+        while (pixCountY <= sizeOfSquare &&
+            pixCountX <= sizeOfSquare) {
           double red = 255;
           double green = 0;
           double blue = 0;
           PixelColor color = new PixelColor(red, green, blue, maxColor,0);
           Pixel newPix = new Pixel (col,row,color);
           pixelArray[row][col] = newPix;
-          pixCount ++;
+          pixCountY ++;
         }
-        while (pixCount <= 20) {
+        while (pixCountY <= 2 * sizeOfSquare &&
+            pixCountX <= 2 * sizeOfSquare) {
           double red = 0;
           double green = 0;
           double blue = 255;
           PixelColor color = new PixelColor(red, green, blue, maxColor,0);
           Pixel newPix = new Pixel (col,row,color);
           pixelArray[row][col] = newPix;
-          pixCount ++;
+          pixCountY ++;
         }
-
-
-
-
-
+      }
+      pixCountX++;
+      if (pixCountX > 2 * sizeOfSquare) {
+        pixCountX = 0;
       }
     }
 
-
-
-    return new Image(height,width,maxColor,pixelArray);
+    return new Image(side,side,maxColor,pixelArray);
   }
 
 
@@ -106,20 +109,20 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
 
     File file;
     String finalFileName = fileName + fileType;
-    FileOutputStream FStream = null;
+    FileOutputStream fStream = null;
     String imageValues = this.image.getImageValues(finalFileName);
 
     try {
       file = new File(fileName + ".ppm");
-      FStream = new FileOutputStream(file);
+      fStream = new FileOutputStream(file);
 
       if (!file.exists()) {
         file.createNewFile();
       }
       byte[] bArray = imageValues.getBytes();
 
-      FStream.write(bArray);
-      FStream.flush ();
+      fStream.write(bArray);
+      fStream.flush ();
     }
 
     catch (IOException e) {
@@ -127,8 +130,8 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     }
 
     try {
-      if (FStream != null) {
-        FStream.close();
+      if (fStream != null) {
+        fStream.close();
       }
     }
     catch (IOException e) {
