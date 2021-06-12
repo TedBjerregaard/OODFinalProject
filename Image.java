@@ -133,22 +133,30 @@ public class Image {
   public String getImageValues(String finalFileName) {
     //add switch case for difference files, with private methods for each
     StringBuilder builder = new StringBuilder();
-    builder.append("P3 # " + finalFileName + "\n" + this.height + " " + this.width + "\n"
+    builder.append("P3 \n# " + finalFileName + "\n" + this.height + " " + this.width + "\n"
         + this.maxColorVal);
     builder.append("\n");
+
+    double [][] red = new double[this.height][this.width];
+    double [][] green = new double[this.height][this.width];
+    double [][] blue = new double[this.height][this.width];
 
     for ( int row = 0; row < this.height; row ++) {
       for (int col = 0; col < this.width; col ++) {
         PixelColor currentColor = this.pixelArray[row][col].color;
-        builder.append(currentColor.red + "\n");
-        builder.append(currentColor.green + "\n");
-        builder.append(currentColor.blue + "\n");
-        builder.append("\n");
+        red[row][col] = currentColor.red;
+        green[row][col] = currentColor.green;
+        blue[row][col] = currentColor.blue;
+
+        builder.append(red[row][col] + "\n");
+        builder.append(green[row][col] + "\n");
+        builder.append(blue[row][col] + "\n");
 
 
 
       }
     }
+
     return builder.toString();
   }
 }
