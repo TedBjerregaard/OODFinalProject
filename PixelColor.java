@@ -4,11 +4,11 @@ public class PixelColor {
 
   int maxVal;
   int minVal;
-  double red;
-  double green;
-  double blue;
+  int red;
+  int green;
+  int blue;
 
-  public PixelColor(double red, double green, double blue, int maxVal, int minVal) {
+  public PixelColor(int red, int green, int blue, int maxVal, int minVal) {
     this.maxVal = maxVal;
     this.minVal = minVal;
     this.red = red;
@@ -24,14 +24,14 @@ public class PixelColor {
     if(this.blue > maxVal) {
       this.blue = maxVal;
     }
-    if(this.red < minVal) {
-      this.red = minVal;
+    if(this.red < 0) {
+      this.red = 0;
     }
-    if(this.green < minVal) {
-      this.green = minVal;
+    if(this.green < 0) {
+      this.green = 0;
     }
-    if(this.blue < minVal) {
-      this.blue = minVal;
+    if(this.blue < 0) {
+      this.blue = 0;
     }
   }
 
@@ -50,12 +50,12 @@ public class PixelColor {
 
 
   public PixelColor applyKernal(float kValue) {
-    return new PixelColor(this.red * kValue, this.green * kValue,
-        this.blue *kValue, this.maxVal, this.minVal);
+    return new PixelColor(Math.round(this.red * kValue), Math.round(this.green * kValue),
+        Math.round(this.blue * kValue), this.maxVal, this.minVal);
   }
 
-  public double getTransformed(List<Double> red) {
+  public int getTransformed(List<Double> red) {
 
-    return  (red.get(0) * this.red + red.get(1) * this.green + red.get(2) *this.blue);
+    return (int) (red.get(0) * this.red + red.get(1) * this.green + red.get(2) *this.blue);
   }
 }

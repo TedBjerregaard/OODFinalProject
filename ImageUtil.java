@@ -32,13 +32,11 @@ public class ImageUtil {
             builder.append(s+System.lineSeparator());
         }
     }
-
-
-
+    
     //now set up the scanner to read from the string we just built
     sc = new Scanner(builder.toString());
 
-    String token;
+    String token; 
 
     token = sc.next();
     if (!token.equals("P3")) {

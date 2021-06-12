@@ -9,14 +9,34 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+
+/**
+ * A simple model for an Image Processor. This model is able to perform several operations to an
+ * image with a corresponding file name.
+ * Operations included currently include:
+ * Producing filtered images (blurred and sharpened).
+ * Producing images with after applying a given color transformation (Sepia and Greyscale).
+ * Importing images (PPM format).
+ * Exporting images (PPM format).
+ */
 public class SimpleImageProcessorModel implements ImageProcessorModel {
 
   Image image;
 
-  public SimpleImageProcessorModel(String filename) {
-    importImage(filename);
+  /**
+   * Creates a model for processing images given a string representing the name of an image to be
+   * imported.
+   *
+   * @param fileName String representing an Image to be imported to the model.
+   */
+  public SimpleImageProcessorModel(String fileName) {
+    importImage(fileName);
   }
 
+  /**
+   * Empty constructor for an image processor model that allows the user to skip the step of
+   * importing an image, and allows them to instead create an image to be processed. //TODO check this.
+   */
   public SimpleImageProcessorModel() {
 
   }
@@ -39,6 +59,7 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     return this.image.filter(k);
   }
 
+  //TODO: combine into oneApplyColorTransformation method
   @Override
   public Image applyGreyscale() {
     List<Double> redList = Arrays.asList(.2126,.7152,.0722);
@@ -59,6 +80,7 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     return finalImage;
   }
 
+  //TODO: make checkerboard a method in image
   @Override
   public Image createImage(int sizeOfSquare, int sizeBoard, int maxColor) {
     int side = sizeBoard * sizeOfSquare;
@@ -68,36 +90,41 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     int pixCountX = 0;
     for (int row = 0; row < side; row++) {
 
+      int pixCountY = 0;
       for (int col = 0; col < side; col++) {
 
-        int pixCountY = 0;
-        while (pixCountY <= sizeOfSquare &&
-            pixCountX <= sizeOfSquare) {
-          double red = 255;
-          double green = 0;
-          double blue = 0;
+
+        while (pixCountY < sizeOfSquare &&
+            pixCountX < sizeOfSquare) {
+          int red = 255;
+          int green = 0;
+          int blue = 0;
           PixelColor color = new PixelColor(red, green, blue, maxColor,0);
           Pixel newPix = new Pixel (col,row,color);
           pixelArray[row][col] = newPix;
           pixCountY ++;
+          col++;
         }
-        while (pixCountY <= 2 * sizeOfSquare &&
-            pixCountX <= 2 * sizeOfSquare) {
-          double red = 0;
-          double green = 0;
-          double blue = 255;
+        while (pixCountY < 2 * sizeOfSquare &&
+            pixCountX < 2 * sizeOfSquare) {
+          int red = 0;
+          int green = 0;
+          int blue = 255;
           PixelColor color = new PixelColor(red, green, blue, maxColor,0);
           Pixel newPix = new Pixel (col,row,color);
           pixelArray[row][col] = newPix;
           pixCountY ++;
+          col++;
         }
       }
-      pixCountX++;
-      if (pixCountX > 2 * sizeOfSquare) {
+
+      if (pixCountX >= 2 * sizeOfSquare) {
         pixCountX = 0;
       }
+      else {
+        pixCountX++;
+      }
     }
-
     return new Image(side,side,maxColor,pixelArray);
   }
 
@@ -136,8 +163,6 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     int height = sc.nextInt();
     int maxValue = sc.nextInt();
 
-
-    int maxColorVal = maxValue;
     int minColorVal = 0;
 
     List<Pixel> pixels = new ArrayList<> ();
@@ -147,7 +172,7 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
         int r = sc.nextInt();
         int g = sc.nextInt();
         int b = sc.nextInt();
-        Pixel toAdd = new Pixel (row,col,new PixelColor(r,g,b, maxColorVal, minColorVal));
+        Pixel toAdd = new Pixel (row,col,new PixelColor(r,g,b, maxValue, minColorVal));
         pixels.add (toAdd);
       }
     }
@@ -161,16 +186,16 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
       }
     }
 
-    this.image = new Image(height, width, maxColorVal, pixelArray);
+    this.image = new Image(height, width, maxValue, pixelArray);
   }
 
   @Override
-  public void exportImage(String fileName, String fileType) {
+  public void exportImage(Image image, String fileName, String fileType) {
 
     File file;
     String finalFileName = fileName + fileType;
     FileOutputStream FStream = null;
-    String imageValues = this.image.getImageValues(finalFileName);
+    String imageValues = image.getImageValues(finalFileName);
 
     try {
       file = new File(fileName + ".ppm");
