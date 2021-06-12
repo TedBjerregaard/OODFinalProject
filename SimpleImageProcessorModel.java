@@ -1,9 +1,13 @@
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class SimpleImageProcessorModel implements ImageProcessorModel {
 
@@ -100,29 +104,85 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
 
 
   @Override
-  public void importImage(String filename) {
-    this.image = new Image(filename);
+  public void importImage(String filename) throws IllegalArgumentException {
+
+    Scanner sc;
+
+    try {
+      sc = new Scanner(new FileInputStream (filename));
+    }
+    catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("File "+filename+ " not found!");
+    }
+    StringBuilder builder = new StringBuilder();
+    //read the file line by line, and populate a string. This will throw away any comment lines
+    while (sc.hasNextLine()) {
+      String s = sc.nextLine();
+      if (s.charAt(0)!='#') {
+        builder.append(s+System.lineSeparator());
+      }
+    }
+
+    //now set up the scanner to read from the string we just built
+    sc = new Scanner(builder.toString());
+
+    String token;
+
+    token = sc.next();
+    if (!token.equals("P3")) {
+      throw new IllegalArgumentException("Invalid PPM file: plain RAW file should begin with P3");
+    }
+    int width = sc.nextInt();
+    int height = sc.nextInt();
+    int maxValue = sc.nextInt();
+
+
+    int maxColorVal = maxValue;
+    int minColorVal = 0;
+
+    List<Pixel> pixels = new ArrayList<> ();
+
+    for (int row=0;row<height;row++) {
+      for (int col=0;col<width;col++) {
+        int r = sc.nextInt();
+        int g = sc.nextInt();
+        int b = sc.nextInt();
+        Pixel toAdd = new Pixel (row,col,new PixelColor(r,g,b, maxColorVal, minColorVal));
+        pixels.add (toAdd);
+      }
+    }
+
+    int current = 0;
+    Pixel[][]pixelArray = new Pixel[height][width];
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        pixelArray[row][col] = pixels.get(current);
+        current++;
+      }
+    }
+
+    this.image = new Image(height, width, maxColorVal, pixelArray);
   }
 
   @Override
-  public void exportImage(String fileName, String fileType){
+  public void exportImage(String fileName, String fileType) {
 
     File file;
     String finalFileName = fileName + fileType;
-    FileOutputStream fStream = null;
+    FileOutputStream FStream = null;
     String imageValues = this.image.getImageValues(finalFileName);
 
     try {
       file = new File(fileName + ".ppm");
-      fStream = new FileOutputStream(file);
+      FStream = new FileOutputStream(file);
 
       if (!file.exists()) {
         file.createNewFile();
       }
       byte[] bArray = imageValues.getBytes();
 
-      fStream.write(bArray);
-      fStream.flush ();
+      FStream.write(bArray);
+      FStream.flush ();
     }
 
     catch (IOException e) {
@@ -130,8 +190,8 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     }
 
     try {
-      if (fStream != null) {
-        fStream.close();
+      if (FStream != null) {
+        FStream.close();
       }
     }
     catch (IOException e) {
