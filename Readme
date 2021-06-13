@@ -1,0 +1,19 @@
+CTMatrix
+- used to create a matrix object used for color transformations, containing all the needed values
+Image
+- used to create an image object
+ImageProcessorModel
+- interface for the model. We are planning to use this when we need to implement a view and
+controller
+Kernel
+- contains the values needed for a filter
+Pixel
+- used to contain pixel information including x and y values as well as color
+PixelColor
+- information about pixel colors (red green and blue values)
+SimpleImageProcessorModel
+- used to implement specific operations on images like blur sepia etc.
+
+
+We used photos we took ourselves in tests so no need to cite anything.
+
