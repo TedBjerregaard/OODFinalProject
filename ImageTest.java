@@ -2,11 +2,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import model.CTMatrix;
+import model.Image;
+import model.Kernel;
+import model.Pixel;
+import model.PixelColor;
+import model.SimpleImageProcessorModel;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test for Image.
+ * Test for model.Image.
  */
 public class ImageTest {
 

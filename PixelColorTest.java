@@ -2,10 +2,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import model.PixelColor;
 import org.junit.Test;
 
 /**
- * Test for PixelColor.
+ * Test for model.PixelColor.
  */
 public class PixelColorTest {
 

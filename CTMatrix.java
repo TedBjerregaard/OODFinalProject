@@ -1,20 +1,22 @@
+package model;
+
 import java.util.List;
 
 
 /**
  * A 3x3 matrix of doubles that correspond to equations that will be applied via matrix
  * multiplication to the current red, green, and blue values in order to find the final,
- * color-transformed red, green, blue values for the final Image.
+ * color-transformed red, green, blue values for the final model.Image.
  */
 public class CTMatrix {
 
-  private List<Double> red;
-  private List<Double> green;
-  private List<Double> blue;
+  private final List<Double> red;
+  private final List<Double> green;
+  private final List<Double> blue;
 
 
   /**
-   * Constructor for the CTMatrix class. Ensures that the size of the matrix is a 3x3.
+   * Constructor for the model.CTMatrix class. Ensures that the size of the matrix is a 3x3.
    *
    * @param red   Matrix of values to determine new red value.
    * @param green Matrix of values to determine new green value.

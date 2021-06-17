@@ -2,11 +2,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import model.CTMatrix;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test for CTMatrix.
+ * Test for model.CTMatrix.
  */
 public class CTMatrixTest {
 

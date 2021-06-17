@@ -1,3 +1,5 @@
+package model;
+
 /**
  * Interface for an image processor model. Contains the current, core operations that any image
  * processor must have.
@@ -5,14 +7,14 @@
 public interface IPModel {
 
   /**
-   * Applies a filter (Kernel) to an image and creates a blurred version of the same image.
+   * Applies a filter (model.Kernel) to an image and creates a blurred version of the same image.
    *
    * @return A blurred version of an image.
    */
   public Image blur();
 
   /**
-   * Applies a filter (Kernel) to an image and creates a sharpened version of the same image.
+   * Applies a filter (model.Kernel) to an image and creates a sharpened version of the same image.
    *
    * @return A sharpened version of an image.
    */
@@ -62,10 +64,10 @@ public interface IPModel {
    * Exports an image with a specified file name and type. Currently, only able to export ".ppm"
    * files.
    *
-   * @param image    Image to be exported from the method to the client.
+   * @param image    model.Image to be exported from the method to the client.
    * @param fileName Name of the final exported image file.
-   * @param FileType Type of file that this image will be exported as.
+   * @param fileType Type of file that this image will be exported as.
    */
-  public void exportImage(Image image, String fileName, String FileType);
+  public void exportImage(Image image, String fileName, String fileType);
 
 }

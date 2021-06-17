@@ -2,11 +2,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import model.Kernel;
 import org.junit.Test;
 
 
 /**
- * Testing class for the Kernel class.
+ * Testing class for the model.Kernel class.
  */
 public class KernelTest {
 

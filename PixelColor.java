@@ -1,8 +1,10 @@
+package model;
+
 import java.util.List;
 
 /**
- * A representation of the color for a Pixel. A PixelColor is made up of red, green, and blue
- * values. A Pixel has a maximum and minimum integer value that its red, green, and blue values can
+ * A representation of the color for a model.Pixel. A model.PixelColor is made up of red, green, and blue
+ * values. A model.Pixel has a maximum and minimum integer value that its red, green, and blue values can
  * be.
  */
 public class PixelColor {
@@ -14,7 +16,7 @@ public class PixelColor {
   private int blue;
 
   /**
-   * Constructor for the PixelColor class. Will automatically clamp a PixelColor to either the
+   * Constructor for the model.PixelColor class. Will automatically clamp a model.PixelColor to either the
    * maximum or minimum allowed value if it is not between those two numbers.
    *
    * @param red    Red value for this color.
@@ -51,33 +53,33 @@ public class PixelColor {
   }
 
   /**
-   * Applies the given value in a Kernel to the red value of this PixelColor to find the filtered
+   * Applies the given value in a model.Kernel to the red value of this model.PixelColor to find the filtered
    * color.
    *
-   * @param kValue Value in a Kernel to be multiplied with this red value.
-   * @return New red value for this PixelColor.
+   * @param kValue Value in a model.Kernel to be multiplied with this red value.
+   * @return New red value for this model.PixelColor.
    */
   public double applyKernelRed(double kValue) {
     return this.red * kValue;
   }
 
   /**
-   * Applies the given value in a Kernel to the green value of this PixelColor to find the filtered
+   * Applies the given value in a model.Kernel to the green value of this model.PixelColor to find the filtered
    * color.
    *
-   * @param kValue Value in a Kernel to be multiplied with this green value.
-   * @return New green value for this PixelColor.
+   * @param kValue Value in a model.Kernel to be multiplied with this green value.
+   * @return New green value for this model.PixelColor.
    */
   public double applyKernelGreen(double kValue) {
     return this.green * kValue;
   }
 
   /**
-   * Applies the given value in a Kernel to the blue value of this PixelColor to find the filtered
+   * Applies the given value in a model.Kernel to the blue value of this model.PixelColor to find the filtered
    * color.
    *
-   * @param kValue Value in a Kernel to be multiplied with this blue value.
-   * @return New blue value for this PixelColor.
+   * @param kValue Value in a model.Kernel to be multiplied with this blue value.
+   * @return New blue value for this model.PixelColor.
    */
   public double applyKernelBlue(double kValue) {
     return this.blue * kValue;
@@ -101,7 +103,7 @@ public class PixelColor {
   }
 
   /**
-   * Gets the maximum value of this PixelColor.
+   * Gets the maximum value of this model.PixelColor.
    *
    * @return Maximum value.
    */
@@ -110,7 +112,7 @@ public class PixelColor {
   }
 
   /**
-   * Gets the minimum value of this PixelColor.
+   * Gets the minimum value of this model.PixelColor.
    *
    * @return Minimum value.
    */
@@ -119,7 +121,7 @@ public class PixelColor {
   }
 
   /**
-   * Gets the red value for this PixelColor.
+   * Gets the red value for this model.PixelColor.
    *
    * @return Red value.
    */
@@ -128,7 +130,7 @@ public class PixelColor {
   }
 
   /**
-   * Gets the green value for this PixelColor.
+   * Gets the green value for this model.PixelColor.
    *
    * @return Green value.
    */
@@ -137,7 +139,7 @@ public class PixelColor {
   }
 
   /**
-   * Gets the blue value for this PixelColor.
+   * Gets the blue value for this model.PixelColor.
    *
    * @return Blue value.
    */

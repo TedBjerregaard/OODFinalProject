@@ -1,3 +1,6 @@
+package model;
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,20 +13,20 @@ import java.util.Scanner;
 
 
 /**
- * A simple model for an Image Processor. This model is able to perform several operations to an
+ * A simple model for an model.Image Processor. This model is able to perform several operations to an
  * image with a corresponding file name. Operations included currently include: Producing filtered
  * images (blurred and sharpened). Producing images with after applying a given color transformation
  * (Sepia and Greyscale). Importing images (PPM format). Exporting images (PPM format).
  */
 public class SimpleImageProcessorModel implements IPModel {
 
-  Image image;
+  public Image image;
 
   /**
    * Creates a model for processing images given a string representing the name of an image to be
    * imported.
    *
-   * @param fileName String representing an Image to be imported to the model.
+   * @param fileName String representing an model.Image to be imported to the model.
    */
   public SimpleImageProcessorModel(String fileName) {
     importImage(fileName);
@@ -185,7 +188,6 @@ public class SimpleImageProcessorModel implements IPModel {
 
   @Override
   public void exportImage(Image image, String fileName, String fileType) {
-
     File file;
     String finalFileName = fileName + fileType;
     FileOutputStream fStream = null;
@@ -214,5 +216,5 @@ public class SimpleImageProcessorModel implements IPModel {
       //
     }
   }
-
 }
+

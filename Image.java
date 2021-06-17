@@ -1,13 +1,14 @@
+package model;
 
 /**
- * A class that represents one method of representing a sequence of pixels, an Image, and its
+ * A class that represents one method of representing a sequence of pixels, an model.Image, and its
  * corresponding data. Each pixel has a corresponding color that is representing using 3 channels:
  * red, green, and blue. Each of these channels are stored using 8-bits, and thus have 256 distinct
  * possible values.
  * Height: Refers to the size of the picture vertically in pixels. Width: Refers to the size of the
- * Image horizontally in pixels. maxColorVal: The maximum integer value for each channel of every
- * pixel in the Image. minColorVal: The minimum integer value for each channel of every pixel in the
- * Image. pixelArray: A 2D array of pixels representing each pixel in the Image and its location in
+ * model.Image horizontally in pixels. maxColorVal: The maximum integer value for each channel of every
+ * pixel in the model.Image. minColorVal: The minimum integer value for each channel of every pixel in the
+ * model.Image. pixelArray: A 2D array of pixels representing each pixel in the model.Image and its location in
  * the image.
  */
 public class Image {
@@ -16,15 +17,15 @@ public class Image {
   private final int width;
   private final int maxColorVal;
   private final int minColorVal;
-  Pixel[][] pixelArray;
+  public Pixel[][] pixelArray;
 
   /**
-   * Constructor for the Image Class. Minimum color value for a channel in a pixel is automatically
+   * Constructor for the model.Image Class. Minimum color value for a channel in a pixel is automatically
    * set to 0.
    *
    * @param height      Size of the image vertically in pixels.
    * @param width       Size of the image vertically in pixels.
-   * @param maxColorVal The maximum integer value for each channel of every pixel in the Image.
+   * @param maxColorVal The maximum integer value for each channel of every pixel in the model.Image.
    * @param pixelArray  2D array of pixels that create the image.
    */
   public Image(int height, int width, int maxColorVal, Pixel[][] pixelArray) {
@@ -42,7 +43,7 @@ public class Image {
    * image.
    *
    * @param matrix A 3x3 matrix of equations corresponding to each
-   * @return An Image with the transformed color values for each pixel.
+   * @return An model.Image with the transformed color values for each pixel.
    */
   public Image transformColor(CTMatrix matrix) {
     Pixel[][] newPixList = new Pixel[height][width];
@@ -59,14 +60,14 @@ public class Image {
   }
 
   /**
-   * Applies an odd-sized Kernel to each pixel in an image to produce a final filtered image. The
-   * Kernel is applied to each pixel and is used to compute the final color values for that given
+   * Applies an odd-sized model.Kernel to each pixel in an image to produce a final filtered image. The
+   * model.Kernel is applied to each pixel and is used to compute the final color values for that given
    * pixel by multiplying the valid, that is existent, pixel color values with the corresponding
-   * Kernel values given a particular pixel.
+   * model.Kernel values given a particular pixel.
    *
    * @param kernel An odd-sized matrix of values that will be applied to each pixel to filter an
    *               image.
-   * @return Returns a new, filtered Image.
+   * @return Returns a new, filtered model.Image.
    */
   public Image filter(Kernel kernel) {
     Pixel[][] newPixList = new Pixel[height][width];
@@ -85,12 +86,12 @@ public class Image {
   }
 
   /**
-   * Applies a given Kernel to a pixel and returns the new color after filtering.
+   * Applies a given model.Kernel to a pixel and returns the new color after filtering.
    *
-   * @param current Pixel being filtered.
+   * @param current model.Pixel being filtered.
    * @param kernel  Matrix of values being applied to this given pixel and the ones surrounding it
-   *                that match with a Kernel value.
-   * @return New PixelColor after filtering through the Kernel.
+   *                that match with a model.Kernel value.
+   * @return New model.PixelColor after filtering through the model.Kernel.
    */
   public PixelColor getNewColor(Pixel current, Kernel kernel) {
     int newRed = 0;
@@ -188,7 +189,7 @@ public class Image {
    *
    * @param row Row position.
    * @param col Column position.
-   * @return Pixel at the given position.
+   * @return model.Pixel at the given position.
    */
   public Pixel getPixel(int row, int col) {
     return pixelArray[row][col];

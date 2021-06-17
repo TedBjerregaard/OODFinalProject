@@ -1,3 +1,5 @@
+package controller;
+
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -8,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
+import model.IPModel;
 
 public class ImageProcessorController implements IPController {
   IPModel model;

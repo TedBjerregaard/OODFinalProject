@@ -2,10 +2,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import model.CTMatrix;
+import model.Pixel;
+import model.PixelColor;
 import org.junit.Test;
 
 /**
- * Test for Pixel.
+ * Test for model.Pixel.
  */
 public class PixelTest {
 
