@@ -17,11 +17,11 @@ public class PixelColorTest {
 
     this.color = new PixelColor(10, 10, 10, 255, 0);
 
-    assertEquals(10, color.blue, .1);
-    assertEquals(10, color.red, .1);
-    assertEquals(10, color.green, .1);
-    assertEquals(255, color.maxVal);
-    assertEquals(0, color.minVal);
+    assertEquals(10, color.getBlue(), .1);
+    assertEquals(10, color.getRed(), .1);
+    assertEquals(10, color.getGreen(), .1);
+    assertEquals(255, color.getMaxVal());
+    assertEquals(0, color.getMinVal());
 
   }
 
@@ -30,9 +30,9 @@ public class PixelColorTest {
 
     this.color = new PixelColor(300, 300, 300, 255, 0);
 
-    assertEquals(255, color.blue, .1);
-    assertEquals(255, color.red, .1);
-    assertEquals(255, color.green, .1);
+    assertEquals(255, color.getBlue(), .1);
+    assertEquals(255, color.getRed(), .1);
+    assertEquals(255, color.getGreen(), .1);
   }
 
   @Test
@@ -40,9 +40,9 @@ public class PixelColorTest {
 
     this.color = new PixelColor(-300, -300, -300, 255, 0);
 
-    assertEquals(0, color.blue, .1);
-    assertEquals(0, color.red, .1);
-    assertEquals(0, color.green, .1);
+    assertEquals(0, color.getBlue(), .1);
+    assertEquals(0, color.getRed(), .1);
+    assertEquals(0, color.getGreen(), .1);
   }
 
   @Test
@@ -51,7 +51,7 @@ public class PixelColorTest {
     this.color = new PixelColor(10, 10, 10, 255, 0);
 
     double resultBlue = this.color.applyKernelBlue(10);
-    double resultGreen = this.color.applyKernelGreen (10);
+    double resultGreen = this.color.applyKernelGreen(10);
     double resultRed = this.color.applyKernelRed(10);
     assertEquals(100, resultBlue, .1);
     assertEquals(100, resultGreen, .1);
@@ -60,7 +60,7 @@ public class PixelColorTest {
 
   @Test
   public void testGetTransformed() {
-    List<Double> redlist = Arrays.asList(.2126,.7152,.0722);
+    List<Double> redlist = Arrays.asList(.2126, .7152, .0722);
 
     this.color = new PixelColor(10, 10, 10, 255, 0);
 

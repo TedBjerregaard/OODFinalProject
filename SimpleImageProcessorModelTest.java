@@ -1,7 +1,7 @@
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,32 +12,33 @@ public class SimpleImageProcessorModelTest {
 
   SimpleImageProcessorModel model;
 
+
   @Before
   public void setup() {
     this.model = new SimpleImageProcessorModel();
   }
 
   @Test
-  public void testCreateImage(){
+  public void testCreateImage() {
 
     PixelColor red = new PixelColor(255, 0, 0, 255, 0);
     PixelColor blue = new PixelColor(0, 0, 255, 255, 0);
 
-    Image newImage = model.createImage(3,10, red, blue);
-    System.out.println(newImage.pixelArray[3][3].color.red);
+    Image newImage = model.createImage(3, 10, red, blue, 255);
+    System.out.println(newImage.pixelArray[3][3].getColor().getRed());
 
-    PixelColor firstSquareType = new PixelColor(255,0,0,255,0);
+    PixelColor firstSquareType = new PixelColor(255, 0, 0, 255, 0);
 
-    assertEquals(4, newImage.height);
-    assertEquals(255,newImage.maxColorVal );
-    assertEquals(4,newImage.width);
+    assertEquals(4, newImage.getHeight());
+    assertEquals(255, newImage.getMaxColorVal());
+    assertEquals(4, newImage.getWidth());
     assertEquals(4, newImage.pixelArray.length);
-    assertEquals(firstSquareType.red,
-        newImage.pixelArray[0][0].color.red);
-    assertEquals(firstSquareType.green,
-        newImage.pixelArray[0][0].color.green);
-    assertEquals(firstSquareType.blue,
-        newImage.pixelArray[0][0].color.blue);
+    assertEquals(firstSquareType.getRed(),
+        newImage.pixelArray[0][0].getColor().getRed());
+    assertEquals(firstSquareType.getGreen(),
+        newImage.pixelArray[0][0].getColor().getGreen());
+    assertEquals(firstSquareType.getBlue(),
+        newImage.pixelArray[0][0].getColor().getBlue());
   }
 
   @Test
@@ -55,30 +56,29 @@ public class SimpleImageProcessorModelTest {
     Image blurred5 = model.blur();
     model.image = blurred5;
 
-    model.exportImage(blurred,"CoffeeAfter", ".ppm");
-    model.exportImage(blurred5,"CoffeeBlurred", ".ppm");
+    model.exportImage(blurred, "CoffeeBlurred", ".ppm");
 
+    SimpleImageProcessorModel modelAfter = new SimpleImageProcessorModel("CoffeeAfter.ppm");
 
-    SimpleImageProcessorModel modelafter = new SimpleImageProcessorModel("CoffeeAfter.ppm");
-
-    Image afterImage = modelafter.image;
-    assertEquals(519, afterImage.height);
-    assertEquals(255,afterImage.maxColorVal);
-    assertEquals(488,afterImage.width);
+    Image afterImage = modelAfter.image;
+    assertEquals(519, afterImage.getHeight());
+    assertEquals(255, afterImage.getMaxColorVal());
+    assertEquals(488, afterImage.getWidth());
     assertEquals(519, afterImage.pixelArray.length);
   }
 
   @Test
-  public void testImportOfExport(){
+  public void testImportOfExport() {
 
+    SimpleImageProcessorModel modelAfter = new SimpleImageProcessorModel("CoffeeAfter.ppm");
 
-    SimpleImageProcessorModel modelafter = new SimpleImageProcessorModel("CoffeeAfter.ppm");
-
-    Image afterImage = modelafter.image;
-    assertEquals(519, afterImage.height);
-    assertEquals(255,afterImage.maxColorVal);
-    assertEquals(519,afterImage.height);
+    Image afterImage = modelAfter.image;
+    assertEquals(519, afterImage.getHeight());
+    assertEquals(255, afterImage.getMaxColorVal());
+    assertEquals(519, afterImage.getHeight());
     assertEquals(519, afterImage.pixelArray.length);
+
+
   }
 
   @Test
@@ -88,6 +88,7 @@ public class SimpleImageProcessorModelTest {
     Image sepiaCoffee = model.applySepia();
     Image greyscaleCoffee = model.applyGreyscale();
     Image sharpCoffee = model.sharpen();
+    assertEquals(519, sharpCoffee.getHeight());
 
     model.exportImage(blurredCoffee, "blurredCoffee", ".ppm");
     model.exportImage(sharpCoffee, "sharpCoffee", ".ppm");
@@ -102,6 +103,7 @@ public class SimpleImageProcessorModelTest {
     Image sepiaTed = model.applySepia();
     Image greyscaleTed = model.applyGreyscale();
     Image sharpTed = model.sharpen();
+    assertEquals(576, sharpTed.getHeight());
 
     model.exportImage(blurredTed, "blurredTed", ".ppm");
     model.exportImage(sharpTed, "sharpTed", ".ppm");

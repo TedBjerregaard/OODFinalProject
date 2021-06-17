@@ -3,7 +3,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,14 +11,11 @@ import java.util.Scanner;
 
 /**
  * A simple model for an Image Processor. This model is able to perform several operations to an
- * image with a corresponding file name.
- * Operations included currently include:
- * Producing filtered images (blurred and sharpened).
- * Producing images with after applying a given color transformation (Sepia and Greyscale).
- * Importing images (PPM format).
- * Exporting images (PPM format).
+ * image with a corresponding file name. Operations included currently include: Producing filtered
+ * images (blurred and sharpened). Producing images with after applying a given color transformation
+ * (Sepia and Greyscale). Importing images (PPM format). Exporting images (PPM format).
  */
-public class SimpleImageProcessorModel implements ImageProcessorModel {
+public class SimpleImageProcessorModel implements IPModel {
 
   Image image;
 
@@ -35,16 +31,17 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
 
   /**
    * Empty constructor for an image processor model that allows the user to skip the step of
-   * importing an image, and allows them to instead create an image to be processed. //TODO check this.
+   * importing an image, and allows them to instead create an image to be processed.
    */
   public SimpleImageProcessorModel() {
+    //nothing
 
   }
 
   @Override
   public Image blur() {
     List<Double> kValues = Arrays.asList(.0625, .125, .0625, .125, .25, .125, .0625, .125, .0625);
-    Kernel k = new Kernel (3,kValues);
+    Kernel k = new Kernel(3, kValues);
     return this.image.filter(k);
   }
 
@@ -55,79 +52,77 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
         -0.125, 0.25, 1.0, 0.25, -0.125,
         -0.125, 0.25, 0.25, 0.25, -0.125,
         -0.125, -0.125, -0.125, -0.125, -0.125);
-    Kernel k = new Kernel (5,kValues);
+    Kernel k = new Kernel(5, kValues);
     return this.image.filter(k);
   }
 
   //TODO: combine into oneApplyColorTransformation method
   @Override
   public Image applyGreyscale() {
-    List<Double> redList = Arrays.asList(.2126,.7152,.0722);
-    List<Double> greenList = Arrays.asList(.2126,.7152,.0722);
-    List<Double> blueList = Arrays.asList(.2126,.7152,.0722);
-    CTMatrix matrix = new CTMatrix(redList,greenList,blueList);
+    List<Double> redList = Arrays.asList(.2126, .7152, .0722);
+    List<Double> greenList = Arrays.asList(.2126, .7152, .0722);
+    List<Double> blueList = Arrays.asList(.2126, .7152, .0722);
+    CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
     Image finalImage = this.image.transformColor(matrix);
     return finalImage;
   }
 
   @Override
   public Image applySepia() {
-    List<Double> redList = Arrays.asList(.393,.769,.189);
-    List<Double> greenList = Arrays.asList(.349,.686,.168);
-    List<Double> blueList = Arrays.asList(.272,.534,.131);
-    CTMatrix matrix = new CTMatrix(redList,greenList,blueList);
+    List<Double> redList = Arrays.asList(.393, .769, .189);
+    List<Double> greenList = Arrays.asList(.349, .686, .168);
+    List<Double> blueList = Arrays.asList(.272, .534, .131);
+    CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
     Image finalImage = this.image.transformColor(matrix);
     return finalImage;
   }
 
-  //TODO: make checkerboard a method in image
+
   @Override
-  public Image createImage(int sizeOfSquare, int sizeBoard, int maxColor) {
-    int side = sizeBoard * sizeOfSquare;
-    int side2 = side * 1;
-    Pixel[][] pixelArray = new Pixel[side][side2];
+  public Image createImage(int tileSize, int numTiles, PixelColor color1, PixelColor color2,
+      int maxColorVal) {
+    int side = tileSize * numTiles;
+    Pixel[][] pixelArray = new Pixel[side][side];
 
     int pixCountX = 0;
-    for (int row = 0; row < side; row++) {
+    int row = 0;
+    while (row < side) {
 
       int pixCountY = 0;
-      for (int col = 0; col < side; col++) {
+      int col = 0;
+      while (col < side) {
 
+        if (pixCountX >= 2 * tileSize) {
+          pixCountX = 0;
+        }
+        if (pixCountY >= 2 * tileSize) {
+          pixCountY = 0;
+        }
 
-        while (pixCountY < sizeOfSquare &&
-            pixCountX < sizeOfSquare) {
-          int red = 255;
-          int green = 0;
-          int blue = 0;
-          PixelColor color = new PixelColor(red, green, blue, maxColor,0);
-          Pixel newPix = new Pixel (col,row,color);
+        if (pixCountY < tileSize &&
+            pixCountX < tileSize) {
+          Pixel newPix = new Pixel(col, row, color1);
           pixelArray[row][col] = newPix;
-          pixCountY ++;
+          pixCountY++;
+          col++;
+        } else if (pixCountY >= tileSize &&
+            pixCountX >= tileSize) {
+          Pixel newPix = new Pixel(col, row, color1);
+          pixelArray[row][col] = newPix;
+          pixCountY++;
+          col++;
+        } else {
+          Pixel newPix = new Pixel(col, row, color2);
+          pixelArray[row][col] = newPix;
+          pixCountY++;
           col++;
         }
-        while (pixCountY < 2 * sizeOfSquare &&
-            pixCountX < 2 * sizeOfSquare) {
-          int red = 0;
-          int green = 0;
-          int blue = 255;
-          PixelColor color = new PixelColor(red, green, blue, maxColor,0);
-          Pixel newPix = new Pixel (col,row,color);
-          pixelArray[row][col] = newPix;
-          pixCountY ++;
-          col++;
-        }
       }
-
-      if (pixCountX >= 2 * sizeOfSquare) {
-        pixCountX = 0;
-      }
-      else {
-        pixCountX++;
-      }
+      pixCountX++;
+      row++;
     }
-    return new Image(side,side,maxColor,pixelArray);
+    return new Image(side, side, maxColorVal, pixelArray);
   }
-
 
 
   @Override
@@ -136,17 +131,16 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
     Scanner sc;
 
     try {
-      sc = new Scanner(new FileInputStream (filename));
-    }
-    catch (FileNotFoundException e) {
-      throw new IllegalArgumentException("File "+filename+ " not found!");
+      sc = new Scanner(new FileInputStream(filename));
+    } catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("File " + filename + " not found!");
     }
     StringBuilder builder = new StringBuilder();
     //read the file line by line, and populate a string. This will throw away any comment lines
     while (sc.hasNextLine()) {
       String s = sc.nextLine();
-      if (s.charAt(0)!='#') {
-        builder.append(s+System.lineSeparator());
+      if (s.charAt(0) != '#') {
+        builder.append(s + System.lineSeparator());
       }
     }
 
@@ -165,20 +159,20 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
 
     int minColorVal = 0;
 
-    List<Pixel> pixels = new ArrayList<> ();
+    List<Pixel> pixels = new ArrayList<>();
 
-    for (int row=0;row<height;row++) {
-      for (int col=0;col<width;col++) {
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
         int r = sc.nextInt();
         int g = sc.nextInt();
         int b = sc.nextInt();
-        Pixel toAdd = new Pixel (row,col,new PixelColor(r,g,b, maxValue, minColorVal));
-        pixels.add (toAdd);
+        Pixel toAdd = new Pixel(row, col, new PixelColor(r, g, b, maxValue, minColorVal));
+        pixels.add(toAdd);
       }
     }
 
     int current = 0;
-    Pixel[][]pixelArray = new Pixel[height][width];
+    Pixel[][] pixelArray = new Pixel[height][width];
     for (int row = 0; row < height; row++) {
       for (int col = 0; col < width; col++) {
         pixelArray[row][col] = pixels.get(current);
@@ -194,32 +188,29 @@ public class SimpleImageProcessorModel implements ImageProcessorModel {
 
     File file;
     String finalFileName = fileName + fileType;
-    FileOutputStream FStream = null;
+    FileOutputStream fStream = null;
     String imageValues = image.getImageValues(finalFileName);
 
     try {
       file = new File(fileName + ".ppm");
-      FStream = new FileOutputStream(file);
+      fStream = new FileOutputStream(file);
 
       if (!file.exists()) {
         file.createNewFile();
       }
       byte[] bArray = imageValues.getBytes();
 
-      FStream.write(bArray);
-      FStream.flush ();
-    }
-
-    catch (IOException e) {
+      fStream.write(bArray);
+      fStream.flush();
+    } catch (IOException e) {
       //
     }
 
     try {
-      if (FStream != null) {
-        FStream.close();
+      if (fStream != null) {
+        fStream.close();
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       //
     }
   }

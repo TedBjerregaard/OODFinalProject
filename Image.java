@@ -1,29 +1,21 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
 
 /**
- * A class that represents one method of representing a sequence of pixels, an Image,
- * and its corresponding data. Each pixel has a corresponding color that is representing using 3
- * channels: red, green, and blue. Each of these channels are stored using 8-bits, and thus have
- * 256 distinct possible values.
- *
- * Height: Refers to the size of the picture vertically in pixels.
- * Width: Refers to the size of the Image horizontally in pixels.
- * maxColorVal: The maximum integer value for each channel of every pixel in the Image.
- * minColorVal: The minimum integer value for each channel of every pixel in the Image.
- * pixelArray: A 2D array of pixels representing each pixel in the Image and its location in the
- *             image.
+ * A class that represents one method of representing a sequence of pixels, an Image, and its
+ * corresponding data. Each pixel has a corresponding color that is representing using 3 channels:
+ * red, green, and blue. Each of these channels are stored using 8-bits, and thus have 256 distinct
+ * possible values.
+ * Height: Refers to the size of the picture vertically in pixels. Width: Refers to the size of the
+ * Image horizontally in pixels. maxColorVal: The maximum integer value for each channel of every
+ * pixel in the Image. minColorVal: The minimum integer value for each channel of every pixel in the
+ * Image. pixelArray: A 2D array of pixels representing each pixel in the Image and its location in
+ * the image.
  */
 public class Image {
 
-  int height;
-  int width;
-  int maxColorVal;
-  int minColorVal;
+  private final int height;
+  private final int width;
+  private final int maxColorVal;
+  private final int minColorVal;
   Pixel[][] pixelArray;
 
   /**
@@ -54,66 +46,81 @@ public class Image {
    */
   public Image transformColor(CTMatrix matrix) {
     Pixel[][] newPixList = new Pixel[height][width];
-    for (int row = 0;  row < this.height; row++) {
+    for (int row = 0; row < this.height; row++) {
       for (int col = 0; col < this.width; col++) {
-        Pixel currentPixel  = this.pixelArray[row][col];
+        Pixel currentPixel = this.pixelArray[row][col];
 
         PixelColor newColor = currentPixel.getTransformedColor(matrix);
-        Pixel newPixel = new Pixel(currentPixel.x, currentPixel.y, newColor);
+        Pixel newPixel = new Pixel(currentPixel.getX(), currentPixel.getY(), newColor);
         newPixList[row][col] = newPixel;
       }
     }
-    return new Image(this.height,this.width, this.maxColorVal, newPixList);
+    return new Image(this.height, this.width, this.maxColorVal, newPixList);
   }
 
   /**
-   * Applies an odd-sized Kernel to each pixel in an image to produce a final filtered image.
-   * The Kernel is applied to each pixel and is used to compute the final color values for that
-   * given pixel by multiplying the valid, that is existent, pixel color values with the
-   * corresponding Kernel values given a particular pixel.
+   * Applies an odd-sized Kernel to each pixel in an image to produce a final filtered image. The
+   * Kernel is applied to each pixel and is used to compute the final color values for that given
+   * pixel by multiplying the valid, that is existent, pixel color values with the corresponding
+   * Kernel values given a particular pixel.
    *
    * @param kernel An odd-sized matrix of values that will be applied to each pixel to filter an
    *               image.
-   * @return  Returns a new, filtered Image.
+   * @return Returns a new, filtered Image.
    */
   public Image filter(Kernel kernel) {
     Pixel[][] newPixList = new Pixel[height][width];
 
-    for (int row = 0;  row < this.height; row++) {
+    for (int row = 0; row < this.height; row++) {
       for (int col = 0; col < this.width; col++) {
-        Pixel currentPixel  = this.pixelArray[row][col];
+        Pixel currentPixel = this.pixelArray[row][col];
 
         PixelColor newColor = getNewColor(currentPixel, kernel);
-        Pixel newPixel = new Pixel(currentPixel.x, currentPixel.y, newColor);
+        Pixel newPixel = new Pixel(currentPixel.getX(), currentPixel.getY(), newColor);
         newPixList[row][col] = newPixel;
       }
     }
 
-    return new Image(this.height,this.width, this.maxColorVal, newPixList);
+    return new Image(this.height, this.width, this.maxColorVal, newPixList);
   }
 
-  //TODO: check this
+  /**
+   * Applies a given Kernel to a pixel and returns the new color after filtering.
+   *
+   * @param current Pixel being filtered.
+   * @param kernel  Matrix of values being applied to this given pixel and the ones surrounding it
+   *                that match with a Kernel value.
+   * @return New PixelColor after filtering through the Kernel.
+   */
   public PixelColor getNewColor(Pixel current, Kernel kernel) {
     int newRed = 0;
     int newGreen = 0;
     int newBlue = 0;
-    for ( int row = 0; row < kernel.size; row ++) {
-      for (int col = 0; col < kernel.size; col ++) {
-        int xValue = current.x + kernel.kArray[row][col][0];
-        int yValue = current.y + kernel.kArray[row][col][1];
+    for (int row = 0; row < kernel.getSize(); row++) {
+      for (int col = 0; col < kernel.getSize(); col++) {
+        int xValue = current.getX() + kernel.getK(row, col, 0);
+        int yValue = current.getY() + kernel.getK(row, col, 1);
 
-        if (xValue >= 0 && yValue >= 0 && xValue < height  && yValue < width) {
-          newRed += pixelArray[xValue][yValue].color.applyKernelRed(kernel.valuesArray[row][col]);
-          newGreen += pixelArray[xValue][yValue].color.applyKernelGreen(kernel.valuesArray[row][col]);
-          newBlue += pixelArray[xValue][yValue].color.applyKernelBlue(kernel.valuesArray[row][col]);
+        if (xValue >= 0 && yValue >= 0 && xValue < height && yValue < width) {
+          newRed += pixelArray[xValue][yValue].getColor().applyKernelRed(kernel.getValue(row, col));
+          newGreen += pixelArray[xValue][yValue].getColor()
+              .applyKernelGreen(kernel.getValue(row, col));
+          newBlue += pixelArray[xValue][yValue].getColor()
+              .applyKernelBlue(kernel.getValue(row, col));
         }
       }
     }
-    return new PixelColor (Math.round(newRed), Math.round(newGreen), Math.round(newBlue),
+    return new PixelColor(Math.round(newRed), Math.round(newGreen), Math.round(newBlue),
         this.maxColorVal, this.minColorVal);
   }
 
 
+  /**
+   * Returns this image as a string in PPM format with the given file name.
+   *
+   * @param finalFileName Name of the file for the image that is being converted to PPM format.
+   * @return String of an image in PPM format.
+   */
   public String getImageValues(String finalFileName) {
     //add switch case for difference files, with private methods for each
     StringBuilder builder = new StringBuilder();
@@ -121,16 +128,16 @@ public class Image {
         + this.maxColorVal);
     builder.append("\n");
 
-    int [][] red = new int[this.height][this.width];
-    int [][] green = new int[this.height][this.width];
-    int [][] blue = new int[this.height][this.width];
+    int[][] red = new int[this.height][this.width];
+    int[][] green = new int[this.height][this.width];
+    int[][] blue = new int[this.height][this.width];
 
-    for ( int row = 0; row < this.height; row ++) {
-      for (int col = 0; col < this.width; col ++) {
-        PixelColor currentColor = this.pixelArray[row][col].color;
-        red[row][col] = currentColor.red;
-        green[row][col] = currentColor.green;
-        blue[row][col] = currentColor.blue;
+    for (int row = 0; row < this.height; row++) {
+      for (int col = 0; col < this.width; col++) {
+        PixelColor currentColor = this.pixelArray[row][col].getColor();
+        red[row][col] = currentColor.getRed();
+        green[row][col] = currentColor.getGreen();
+        blue[row][col] = currentColor.getBlue();
 
         builder.append(red[row][col] + "\n");
         builder.append(green[row][col] + "\n");
@@ -139,4 +146,52 @@ public class Image {
     }
     return builder.toString();
   }
+
+  /**
+   * Gets the height of this image.
+   *
+   * @return Height of this image.
+   */
+  public int getHeight() {
+    return this.height;
+  }
+
+  /**
+   * Gets the width of this image.
+   *
+   * @return Width of this image.
+   */
+  public int getWidth() {
+    return this.width;
+  }
+
+  /**
+   * Gets the maximum color value for this image.
+   *
+   * @return Maximum color value.
+   */
+  public int getMaxColorVal() {
+    return this.maxColorVal;
+  }
+
+  /**
+   * Gets the minimum color value for this image.
+   *
+   * @return Minimum color value.
+   */
+  public int getMinColorVal() {
+    return this.minColorVal;
+  }
+
+  /**
+   * Returns the pixel at a given row and column position.
+   *
+   * @param row Row position.
+   * @param col Column position.
+   * @return Pixel at the given position.
+   */
+  public Pixel getPixel(int row, int col) {
+    return pixelArray[row][col];
+  }
+
 }
