@@ -2,28 +2,24 @@ package model;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 public class ComplexImageProcessorModel implements IPModel {
 
-  IPModel delegate;
-  String fileType;
-  Image image;
-  List<Image> layers;
+  private IPModel delegate;
+  private String fileType;
+  int curentLayer;
+  private List<Image> layers;
 
   public ComplexImageProcessorModel(IPModel delegate) {
     Objects.requireNonNull(delegate);
@@ -40,11 +36,11 @@ public class ComplexImageProcessorModel implements IPModel {
   public Image blur(){
     List<Double> kValues = Arrays.asList(.0625, .125, .0625, .125, .25, .125, .0625, .125, .0625);
     Kernel k = new Kernel(3, kValues);
-    return this.image.filter(k);
+    return this.layers.get(this.curentLayer).filter(k);
   }
 
-  public Image getImage() {
-    return image;
+  public Image getCurrentImage() {
+    return this.layers.get(this.curentLayer);
   }
 
   /**
@@ -60,7 +56,9 @@ public class ComplexImageProcessorModel implements IPModel {
         -0.125, 0.25, 0.25, 0.25, -0.125,
         -0.125, -0.125, -0.125, -0.125, -0.125);
     Kernel k = new Kernel(5, kValues);
-    return this.image.filter(k);
+    Image finalImage =this.layers.get(this.curentLayer).filter(k);
+    this.layers.set(this.curentLayer,finalImage);
+    return finalImage;
   }
 
   /**
@@ -76,7 +74,9 @@ public class ComplexImageProcessorModel implements IPModel {
     List<Double> greenList = Arrays.asList(.2126, .7152, .0722);
     List<Double> blueList = Arrays.asList(.2126, .7152, .0722);
     CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
-    Image finalImage = this.image.transformColor(matrix);
+    Image finalImage = this.layers.get(this.curentLayer).transformColor(matrix);
+    this.layers.set(this.curentLayer,finalImage);
+
     return finalImage;
   }
 
@@ -89,11 +89,13 @@ public class ComplexImageProcessorModel implements IPModel {
    */
   @Override
   public Image applySepia() {
+    Image currentLayer = this.layers.get(this.curentLayer);
     List<Double> redList = Arrays.asList(.393, .769, .189);
     List<Double> greenList = Arrays.asList(.349, .686, .168);
     List<Double> blueList = Arrays.asList(.272, .534, .131);
     CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
-    Image finalImage = this.image.transformColor(matrix);
+    Image finalImage = currentLayer.transformColor(matrix);
+    this.layers.set(this.curentLayer,finalImage);
     return finalImage;
 
   }
@@ -113,7 +115,7 @@ public class ComplexImageProcessorModel implements IPModel {
   @Override
   public Image createImage(int tileSize, int numTiles, PixelColor color1, PixelColor color2,
       int maxColorVal){
-    this.image = delegate.createImage(tileSize,numTiles,color1,color2,maxColorVal);
+    this.layers.set (this.curentLayer,delegate.createImage(tileSize,numTiles,color1,color2,maxColorVal));
     return this.delegate.createImage(tileSize,numTiles,color1,color2,maxColorVal);
   }
 
@@ -130,7 +132,7 @@ public class ComplexImageProcessorModel implements IPModel {
     String fileTag = fileName.substring (fileName.length() -3);
     if ( fileTag.equals("ppm")) {
       this.delegate.importImage(fileName);
-      this.image = this.delegate.getImage();
+      this.layers.add (this.curentLayer,this.delegate.getCurrentImage ());
       this.fileType = "ppm";
 
 
@@ -148,7 +150,9 @@ public class ComplexImageProcessorModel implements IPModel {
 
         ImageReader reader = imageReader.next();
         this.fileType = reader.getFormatName (); //TODO: maybe get rid of field for file type
-        this.image = importHelper(fileIn);
+        this.layers.add (this.curentLayer,importHelper(fileIn));
+
+
 
 
         //ImageIO.write(image, this.formatName, this.outputImage);
@@ -203,7 +207,7 @@ public class ComplexImageProcessorModel implements IPModel {
       this.delegate.exportImage(image,fileName,FileType);
     }
     else {
-      String finalFileName = fileName +"." +  FileType;
+      String finalFileName = fileName + "." +  FileType;
 
       File file = new File(finalFileName);
       BufferedImage buff = new BufferedImage (image.getWidth(), image.getHeight(),
@@ -229,26 +233,16 @@ public class ComplexImageProcessorModel implements IPModel {
     }
   }
 
-  public void setBaseImage(Image image) {
-    this.image = image;
+  public void setCurrentLayer(int index) {
+    this.curentLayer = index;
   }
 
-  public void importLayer(String fileName, int index) throws IOException {
-    File fileIn;
-    fileIn = new File(fileName);
-    ImageInputStream imStream = ImageIO.createImageInputStream(fileIn);
 
 
 
-    Image newImage = importHelper(fileIn);
-    this.layers.add(index,newImage);
-  }
 
-  public Image accessLayer(int layer) {
-    return this.layers.get(layer);
-  }
+  public void exportTopLayer(String filename) {
 
-  public void exportTopLayer() {
-
+    this.exportImage(this.layers.get(this.layers.size()), filename, fileType);
   }
 }
