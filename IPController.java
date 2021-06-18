@@ -1,7 +1,10 @@
 package controller;
 
+import model.IPModel;
+
 public interface IPController {
 
-  void ImportImage(String fileName);
+
+  void go();
 
 }

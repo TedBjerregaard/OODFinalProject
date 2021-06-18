@@ -3,15 +3,29 @@ package model;
 public interface IImageLayer {
 
 
-  public void makeVisible();
+  void makeVisible();
 
-  public void makeInvisible();
+  void makeInvisible();
 
-  public ImageLayer makeNewBlankLayer(String name, String fileType);
+  ImageLayer makeNewBlankLayer();
 
-  public ImageLayer makeCopy(ImageLayer toCopy);
+  ImageLayer makeCopy();
+
+  Image getImage();
+
+  void replaceImage(Image image);
+
+  boolean isVisible();
+
+  String getName();
+
+  String getFileType();
+
+  void updateLayer(IImageLayer layer);
 
 
+  void setFiletype(String filetype);
 
+  void setName(String name);
 
 }

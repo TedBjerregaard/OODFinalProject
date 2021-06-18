@@ -4,22 +4,23 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-public class ComplexImageProcessorModel implements IPModel {
+public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
 
   private IPModel delegate;
-  private String fileType;
-  int curentLayer;
-  private List<Image> layers;
+  int currentLayer;
+  private List<IImageLayer> layers;
 
   public ComplexImageProcessorModel(IPModel delegate) {
     Objects.requireNonNull(delegate);
@@ -33,15 +34,17 @@ public class ComplexImageProcessorModel implements IPModel {
    * @return A blurred version of an image.
    */
   @Override
-  public Image blur(){
+  public Image blur() {
+    IImageLayer current = this.layers.get(this.currentLayer);
     List<Double> kValues = Arrays.asList(.0625, .125, .0625, .125, .25, .125, .0625, .125, .0625);
     Kernel k = new Kernel(3, kValues);
-    return this.layers.get(this.curentLayer).filter(k);
+    Image modImage = current.getImage().filter(k);
+    //this.exportImage(modImage,current.getName() + "-blur",current.getFileType());
+    current.replaceImage(modImage);
+    return modImage;
   }
 
-  public Image getCurrentImage() {
-    return this.layers.get(this.curentLayer);
-  }
+
 
   /**
    * Applies a filter (Kernel) to an image and creates a sharpened version of the same image.
@@ -50,15 +53,17 @@ public class ComplexImageProcessorModel implements IPModel {
    */
   @Override
   public Image sharpen() {
+    IImageLayer current = this.layers.get(this.currentLayer);
     List<Double> kValues = Arrays.asList(-0.125, -0.125, -0.125, -0.125, -0.125,
         -0.125, .25, .25, .25, -0.125,
         -0.125, 0.25, 1.0, 0.25, -0.125,
         -0.125, 0.25, 0.25, 0.25, -0.125,
         -0.125, -0.125, -0.125, -0.125, -0.125);
     Kernel k = new Kernel(5, kValues);
-    Image finalImage =this.layers.get(this.curentLayer).filter(k);
-    this.layers.set(this.curentLayer,finalImage);
-    return finalImage;
+    Image modImage =current.getImage().filter(k);
+    //this.exportImage(modImage,current.getName() + "-Sharpen",current.getFileType());
+    current.replaceImage(modImage);
+    return modImage;
   }
 
   /**
@@ -69,15 +74,17 @@ public class ComplexImageProcessorModel implements IPModel {
    * @return A version of an image with a greyscale color transformation applied to it.
    */
   @Override
-  public Image applyGreyscale(){
+  public Image applyGreyscale() {
+    IImageLayer current = this.layers.get(this.currentLayer);
+
     List<Double> redList = Arrays.asList(.2126, .7152, .0722);
     List<Double> greenList = Arrays.asList(.2126, .7152, .0722);
     List<Double> blueList = Arrays.asList(.2126, .7152, .0722);
     CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
-    Image finalImage = this.layers.get(this.curentLayer).transformColor(matrix);
-    this.layers.set(this.curentLayer,finalImage);
-
-    return finalImage;
+    Image modImage = current.getImage().transformColor(matrix);
+    //this.exportImage(modImage,current.getName() + "-Greyscale",current.getFileType());
+    current.replaceImage(modImage);
+    return modImage;
   }
 
   /**
@@ -89,14 +96,15 @@ public class ComplexImageProcessorModel implements IPModel {
    */
   @Override
   public Image applySepia() {
-    Image currentLayer = this.layers.get(this.curentLayer);
+    IImageLayer current = this.layers.get(this.currentLayer);
     List<Double> redList = Arrays.asList(.393, .769, .189);
     List<Double> greenList = Arrays.asList(.349, .686, .168);
     List<Double> blueList = Arrays.asList(.272, .534, .131);
     CTMatrix matrix = new CTMatrix(redList, greenList, blueList);
-    Image finalImage = currentLayer.transformColor(matrix);
-    this.layers.set(this.curentLayer,finalImage);
-    return finalImage;
+    Image modImage = current.getImage().transformColor(matrix);
+    //this.exportImage(modImage,current.getName() + "-Sepia",current.getFileType());
+    current.replaceImage(modImage);
+    return modImage;
 
   }
 
@@ -114,9 +122,10 @@ public class ComplexImageProcessorModel implements IPModel {
    */
   @Override
   public Image createImage(int tileSize, int numTiles, PixelColor color1, PixelColor color2,
-      int maxColorVal){
-    this.layers.set (this.curentLayer,delegate.createImage(tileSize,numTiles,color1,color2,maxColorVal));
+      int maxColorVal) {
+
     return this.delegate.createImage(tileSize,numTiles,color1,color2,maxColorVal);
+
   }
 
   /**
@@ -129,12 +138,15 @@ public class ComplexImageProcessorModel implements IPModel {
 
     File fileIn;
 
-    String fileTag = fileName.substring (fileName.length() -3);
-    if ( fileTag.equals("ppm")) {
+    String fileTag = fileName.substring(fileName.length() - 3);
+    if (fileTag.equals("ppm")) {
       this.delegate.importImage(fileName);
-      this.layers.add (this.curentLayer,this.delegate.getCurrentImage ());
-      this.fileType = "ppm";
-
+      IImageLayer current = this.layers.get(this.currentLayer);
+      if (current.getImage() == null) {
+        current.replaceImage(this.delegate.getCurrentImage());
+      }
+      current.setFiletype(fileTag);
+      current.setName(fileName);
 
     }
 
@@ -147,15 +159,12 @@ public class ComplexImageProcessorModel implements IPModel {
         if (!imageReader.hasNext()) {
           throw new RuntimeException ("reader error");
         }
+        IImageLayer current = this.layers.get(this.currentLayer);
 
         ImageReader reader = imageReader.next();
-        this.fileType = reader.getFormatName (); //TODO: maybe get rid of field for file type
-        this.layers.add (this.curentLayer,importHelper(fileIn));
-
-
-
-
-        //ImageIO.write(image, this.formatName, this.outputImage);
+        current.setName(fileName);
+        current.setFiletype(reader.getFormatName()); //TODO: maybe get rid of field for file type
+        this.layers.set(this.currentLayer,importHelper(fileIn));
 
 
       } catch (FileNotFoundException e) {
@@ -164,32 +173,30 @@ public class ComplexImageProcessorModel implements IPModel {
         exception.printStackTrace ();
       }
     }
-
   }
 
-  private Image importHelper(File fileIn) throws IOException {
+  private IImageLayer importHelper(File fileIn) throws IOException {
     BufferedImage BuffImage;
     BuffImage = ImageIO.read(fileIn);
     int w = BuffImage.getWidth();
     int h = BuffImage.getHeight();
 
-    int[][] result = new int[h][w];
-
     Pixel[][] pixArray = new Pixel[h][w];
     for (int row = 0; row < h; row++) {
       for (int col = 0; col < w; col++) {
-        result[row][col] = BuffImage.getRGB(col, row);
-        Color mycolor = new Color(BuffImage.getRGB(col, row));
+        Color thisColor = new Color(BuffImage.getRGB(col, row));
 
-        PixelColor pc = new PixelColor (mycolor.getRed (), mycolor.getGreen (),
-            mycolor.getBlue (), 0,255);
+        PixelColor pc = new PixelColor (thisColor.getRed (), thisColor.getGreen (),
+            thisColor.getBlue (), 0,255);
         pixArray[row][col] = new Pixel (col,row,pc);
       }
     }
 
     Image image = new Image (h,w,255,pixArray);
+    IImageLayer current = this.layers.get(this.currentLayer);
 
-    return image;
+    IImageLayer imageLayer = new ImageLayer(image,fileIn.getName(), current.getFileType());
+    return imageLayer;
   }
 
   /**
@@ -219,7 +226,6 @@ public class ComplexImageProcessorModel implements IPModel {
           Color currentColor = new Color(pixColor.getRed(),pixColor.getGreen(),pixColor.getBlue());
           int colorInt = currentColor.getRGB();
           buff.setRGB(row,col,colorInt);
-
         }
       }
       try {
@@ -228,21 +234,123 @@ public class ComplexImageProcessorModel implements IPModel {
       catch (IOException e) {
         throw new IllegalArgumentException ("check filetype");
       }
-
-
     }
   }
 
+  public void saveImageLayer(Image image) {
+    IImageLayer current = this.layers.get(this.currentLayer);
+    current.replaceImage(image);
+  }
+
   public void setCurrentLayer(int index) {
-    this.curentLayer = index;
+    this.currentLayer = index;
+  }
+
+  public Image getCurrentImage() {
+    return this.layers.get(this.currentLayer).getImage();
   }
 
 
 
+  public void exportTopVisibleLayer(String filename, String fileType) {
+    IImageLayer current = this.layers.get(this.currentLayer);
 
-
-  public void exportTopLayer(String filename) {
-
-    this.exportImage(this.layers.get(this.layers.size()), filename, fileType);
+    for (int i = this.layers.size() - 1; i >= 0; i--) {
+      if (this.layers.get(i).isVisible()) {
+        this.exportImage(this.layers.get(i).getImage(), filename, fileType);
+        return;
+      }
+    }
   }
+
+  public void createLayer(int index) {
+    this.layers.add(index,new ImageLayer(null,null,null));
+  }
+
+  public void copyCurrentLayer(int index) {
+    IImageLayer current = this.layers.get(this.currentLayer);
+    IImageLayer copy = current.makeCopy();
+    this.layers.get(index).updateLayer(copy);
+  }
+
+  public void removeLayer(int index) {
+    this.layers.remove(index);
+    if (index == this.currentLayer) {
+      this.currentLayer = this.currentLayer - 1;
+    }
+  }
+
+  public void makeInvisible() {
+    IImageLayer current = this.layers.get(this.currentLayer);
+    current.makeInvisible();
+  }
+
+  public void makeVisible() {
+    IImageLayer current = this.layers.get(this.currentLayer);
+    current.makeInvisible();
+  }
+
+  @Override
+  public void importMultiLayeredImage(String fileName) {
+
+    try {
+      File toImport = new File(fileName);
+      Scanner reader = new Scanner(toImport);
+      int current = 0;
+      String token;
+
+      while (reader.hasNext()) {
+        token = reader.next();
+
+        if (token.equals("IP3")) {
+          this.createLayer(current);
+          this.setCurrentLayer(current);
+          IImageLayer currentLayer = this.layers.get(current);
+          String visible = reader.next();
+          if (visible.equals("true")) {
+            currentLayer.makeInvisible();
+          }
+          if (visible.equals("false")) {
+            currentLayer.makeInvisible();
+          }
+          this.importImage(reader.next());
+          current ++;
+        }
+        else {
+          throw new IllegalArgumentException ("bad file format");
+        }
+      }
+
+
+
+    }
+    catch (IOException io) {
+      //
+    }
+  }
+
+  @Override
+  public void exportMultiLayeredImage(String fileName) {
+
+    StringBuilder builder = new StringBuilder();
+    builder.append("IP3\n");
+    for (int i = 0; i < this.layers.size(); i++) {
+      IImageLayer current = layers.get(i);
+      builder.append(current.isVisible() + "\n");
+      builder.append(current.getName() + "\n");
+      this.exportImage(current.getImage(), current.getName(), current.getFileType());
+
+      File multiLayeredLocations = new File(fileName);
+      try {
+        FileWriter writer = new FileWriter(multiLayeredLocations);
+        writer.write(builder.toString());
+        writer.flush();
+        writer.close();
+      }
+      catch (IOException io) {
+        throw new IllegalArgumentException("cannot create text file");
+      }
+    }
+  }
+
 }

@@ -3,9 +3,9 @@ package model;
 public class ImageLayer implements IImageLayer {
 
   private Image image;
-  boolean visible;
-  String name;
-  String fileType;
+  private boolean visible;
+  private String name;
+  private String fileType;
 
   public ImageLayer(Image image, String name, String fileType) {
     this.image = image;
@@ -25,13 +25,56 @@ public class ImageLayer implements IImageLayer {
   }
 
   @Override
-  public ImageLayer makeNewBlankLayer(String name, String fileType) {
-    return new ImageLayer(null, name, fileType);
+  public ImageLayer makeNewBlankLayer() {
+    return new ImageLayer(null, null, null);
   }
 
   @Override
-  public ImageLayer makeCopy(ImageLayer toCopy) {
-    return new ImageLayer(toCopy.image, toCopy.name, toCopy.fileType);
+  public ImageLayer makeCopy() {
+    return new ImageLayer(this.image, this.name, this.fileType);
   }
-  
+
+  public Image getImage(){
+    return image;
+  }
+
+  @Override
+  public void replaceImage(Image image){
+    this.image = image;
+  }
+
+  @Override
+  public boolean isVisible(){
+    return this.visible;
+  }
+
+  @Override
+  public String getName(){
+    return this.name;
+  }
+
+  @Override
+  public String getFileType(){
+    return this.fileType;
+  }
+
+  @Override
+  public void updateLayer(IImageLayer layer){
+    this.image = layer.getImage();
+    this.visible = layer.isVisible();
+    this.name = layer.getName();
+    this.fileType = layer.getFileType();
+  }
+
+  @Override
+  public void setFiletype(String filetype){
+    this.fileType = filetype;
+  }
+
+  @Override
+  public void setName(String name){
+    this.name = name;
+  }
+
+
 }
