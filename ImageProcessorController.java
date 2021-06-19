@@ -85,50 +85,81 @@ public class ImageProcessorController implements IPController {
           String fileName = in.next();
           this.model.importImage(fileName);
           renderMessageHelp(view,fileName + " loaded to layer: "
-              + this.model.getCurrentLayer());
+              + this.model.getCurrentLayer() + "\n");
           break;
 
         case "export":
-          this.model.exportMultiLayeredImage(in.next());
+          String fileNameExport = in.next();
+          this.model.exportMultiLayeredImage(fileNameExport);
+          renderMessageHelp(view,fileNameExport + " Exported" + "\n");
           //exports multilayered image as a text file
 
         case "import":
-          this.model.importMultiLayeredImage(in.next());
+          String fileNameImport = in.next();
+          this.model.importMultiLayeredImage(fileNameImport);
+          renderMessageHelp(view,fileNameImport + " Imported" + "\n");
+
 
         case "save":
+          String fileNameSave = in.next();
+
           this.model.exportTopVisibleLayer(in.next(), in.next());
+          renderMessageHelp(view,fileNameSave + " Saved" + "\n");
+
           break;
 
         case "copy":
-          this.model.copyCurrentLayer(in.nextInt());
+          int layerIndex = in.nextInt();
+          this.model.copyCurrentLayer(layerIndex);
+          renderMessageHelp(view,"Layer Copied to: " + layerIndex + "\n");
+
           break;
 
         case "remove":
-          this.model.removeLayer(in.nextInt());
+          int layerIndexRemove = in.nextInt();
+          this.model.removeLayer(layerIndexRemove);
+          renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
           break;
 
         case "visible":
           this.model.makeInvisible();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Visible"
+              + "\n");
           break;
 
         case "invisible":
           this.model.makeVisible();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Invisible"
+              + "\n");
+
           break;
 
         case "sepia":
           this.model.applySepia();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Sepia"
+              + "\n");
+
           break;
 
         case "greyscale":
           this.model.applyGreyscale();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Greyscale"
+              + "\n");
+
           break;
 
         case "blur":
           this.model.blur();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Blurred"
+              + "\n");
+
           break;
 
         case "sharpen":
           this.model.sharpen();
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Sharpened"
+              + "\n");
+
           break;
       }
     }
