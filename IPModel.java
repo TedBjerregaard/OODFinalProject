@@ -70,4 +70,8 @@ public interface IPModel {
    */
   public void exportImage(Image image, String fileName, String fileType);
 
+  //added
+  Image getCurrentImage();
+
+
 }

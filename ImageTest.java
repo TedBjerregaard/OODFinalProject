@@ -28,7 +28,7 @@ public class ImageTest {
   @Test
   public void testCreateImage() {
     this.model.importImage("Ted.ppm");
-    this.image = model.image;
+    this.image = model.getCurrentImage ();
     assertEquals(576, image.getHeight());
     assertEquals(436, image.getWidth());
     assertEquals(255, image.getMaxColorVal());

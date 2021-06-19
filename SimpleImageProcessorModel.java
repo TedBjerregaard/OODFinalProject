@@ -32,6 +32,13 @@ public class SimpleImageProcessorModel implements IPModel {
     importImage(fileName);
   }
 
+
+  //Added a new constructor taking in a Image
+  public SimpleImageProcessorModel(Image image) {
+    this.image = image;
+  }
+
+
   /**
    * Empty constructor for an image processor model that allows the user to skip the step of
    * importing an image, and allows them to instead create an image to be processed.
@@ -189,12 +196,12 @@ public class SimpleImageProcessorModel implements IPModel {
   @Override
   public void exportImage(Image image, String fileName, String fileType) {
     File file;
-    String finalFileName = fileName + fileType;
+    String finalFileName = fileName + "." + fileType;
     FileOutputStream fStream = null;
     String imageValues = image.getImageValues(finalFileName);
 
     try {
-      file = new File(fileName + ".ppm");
+      file = new File(finalFileName);
       fStream = new FileOutputStream(file);
 
       if (!file.exists()) {
@@ -216,5 +223,12 @@ public class SimpleImageProcessorModel implements IPModel {
       //
     }
   }
+
+  //added for complex import method
+  public Image getCurrentImage() {
+    return this.image;
+  }
+
+
 }
 
