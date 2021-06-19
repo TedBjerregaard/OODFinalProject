@@ -1,19 +1,25 @@
 package controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 import model.ComplexImageProcessorModel;
+import model.SimpleImageProcessorModel;
+import view.ImageProcessorView;
 
 public class ImageProcessorController implements IPController {
   ComplexImageProcessorModel model;
   private Scanner in;
-  Readable rd;
   Appendable ap;
 
 
-  public ImageProcessorController(ComplexImageProcessorModel model, InputStream in) {
+  public ImageProcessorController(ComplexImageProcessorModel model, InputStream in,
+      Appendable out) {
     this.model = model;
     this.in = new Scanner(in);
+    this.ap = out;
 
   }
 
@@ -21,6 +27,7 @@ public class ImageProcessorController implements IPController {
   @Override
   public void go() {
 
+    ImageProcessorView view = new ImageProcessorView(this.ap);
     boolean quit = false;
 
     while (!quit) {
@@ -28,18 +35,57 @@ public class ImageProcessorController implements IPController {
       switch (command) {
         case "quit":
           quit = true;
+          renderMessageHelp(view, "IP closed");
           break;
+
+        case "txtCommand":
+          String filename = in.next();
+          File inFile = new File(filename);
+          try {
+            SimpleImageProcessorModel simpleModel = new SimpleImageProcessorModel();
+            ComplexImageProcessorModel ComplexModel = new ComplexImageProcessorModel(simpleModel);
+            InputStream targetStream = new FileInputStream (inFile);
+            IPController controller = new ImageProcessorController(ComplexModel, targetStream,
+                System.out);
+            controller.go();
+          }
+          catch (IOException io) {
+            throw new IllegalArgumentException ("stupid idiot");
+          }
+          break;
+
+
         case "create":
-          this.model.createLayer(in.nextInt());
+          int index = in.nextInt();
+          if (index > this.model.getNumLayers() || index < 0) {
+            renderMessageHelp(view,"invalid layer index\n");
+
+            break;
+          }
+          this.model.createLayer(index);
+          this.model.setCurrentLayer(index);
+          renderMessageHelp(view,"layer " + this.model.getCurrentLayer() + " created\n");
+          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayer()
+              + "\n Layers in IP: " + this.model.getNumLayers() + "\n");
           break;
 
         case "current":
-          this.model.setCurrentLayer(in.nextInt());
+          int currentIndex = in.nextInt();
+          if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
+            renderMessageHelp(view,"invalid layer index\n");
+            break;
+          }
+          this.model.setCurrentLayer(currentIndex);
+          renderMessageHelp(view,"Current Layer: " + this.model.getCurrentLayer() + "\n");
+
           break;
 
         case "load":
           // add functionality for multilayered image
-          this.model.importImage(in.next());
+          String fileName = in.next();
+          this.model.importImage(fileName);
+          renderMessageHelp(view,fileName + " loaded to layer: "
+              + this.model.getCurrentLayer());
           break;
 
         case "export":
@@ -87,8 +133,12 @@ public class ImageProcessorController implements IPController {
       }
     }
   }
-
-
-
-
+  private void renderMessageHelp(ImageProcessorView view, String string) {
+    try {
+      view.renderMessage(string);
+    }
+    catch (IOException io) {
+      throw new IllegalStateException("error rendering message");
+    }
+  }
 }

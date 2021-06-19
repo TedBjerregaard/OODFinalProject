@@ -19,7 +19,7 @@ import javax.imageio.stream.ImageInputStream;
 public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
 
   private IPModel delegate;
-  int currentLayer;
+  int currentLayer;  //private
   private List<IImageLayer> layers;
 
   public ComplexImageProcessorModel(IPModel delegate) {
@@ -358,6 +358,14 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
         throw new IllegalArgumentException("cannot create text file");
       }
     }
+  }
+
+  public int getCurrentLayer() {
+    return this.currentLayer;
+  }
+
+  public int getNumLayers() {
+    return this.layers.size();
   }
 
 }

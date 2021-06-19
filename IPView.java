@@ -4,6 +4,6 @@ import java.io.IOException;
 
 public interface IPView {
 
-  public void renderMessage() throws IOException;
+  public void renderMessage(String message) throws IOException;
 
 }
