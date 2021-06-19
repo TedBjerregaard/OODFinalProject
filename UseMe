@@ -1,0 +1,57 @@
+Image Processor Script Commands
+Assumptions
+- All commands are lowercase unless otherwise specified or a filename
+
+Commands
+- quit
+- txtCommand
+  - followed by a .txt filename
+  - used to import a multiLayer Image
+  - text file contains image filenames and Layer information
+- create
+  - followed by an integer (representing where the Layer is created)
+  - creates an empty Image Layer to be populated with load
+  - will throw error and re prompt if layers are not added starting at
+    zero in ascending order.
+- current
+  - followed by an integer (Layer index to change to)
+  - Layer must be already created to be the current layer
+- load
+  - followed by a filename
+  - loads the specified file into the Current Layer
+  - if there is already an image there it overwrites it
+- export
+  - followed by a filename, a space, then a filetype (ex. ppm)
+  - exports a multi layer image into a .txt file containing the location of
+    each layer and its associated image
+  - saves each Image to the current file
+- import
+  - followed by a .txt filename
+  - Imports a multilayer image to the processor in the state it was saved in
+- save
+  - followed by (string) fileName and (string) fileType
+  - saves the topmost visible Layer as the specified filename and type
+- copy
+  - followed by integer (index of Layer where the current layer will be copied to
+  - copies the current Layer to the specified Layer location
+- remove
+  - followed by integer (index of layer to remove)
+  - removes the index
+- visible
+  - followed by nothing
+  - makes the current layer visible
+- invisible
+  - followed by nothing
+  - makes the current layer invisible
+- sepia
+  - followed by nothing
+  - applies the sepia filter to the current image
+- greyscale
+  - followed by nothing
+  - applies grayscale filter to current image
+- blur
+  - followed by nothing
+  - blurs the current image
+- sharpen
+  - followed by nothing 
+  - sharpens the current image

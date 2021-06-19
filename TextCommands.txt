@@ -1,0 +1,14 @@
+create 0
+create 1
+current 0
+load Ted.ppm
+current 1
+load Ted.ppm
+sharpen
+sharpen
+sharpen
+save sharpTed ppm
+create 3
+current 3
+load Coffee.ppm
+quit

@@ -1,19 +1,26 @@
-CTMatrix
-- used to create a matrix object used for color transformations, containing all the needed values
-Image
-- used to create an image object
-ImageProcessorModel
-- interface for the model. We are planning to use this when we need to implement a view and
-controller
-Kernel
-- contains the values needed for a filter
-Pixel
-- used to contain pixel information including x and y values as well as color
-PixelColor
-- information about pixel colors (red green and blue values)
-SimpleImageProcessorModel
-- used to implement specific operations on images like blur sepia etc.
+About/ OverView
+This Image Processor is designed to support JPEG PNG and PPM files
+Operations on these files include Blur/Sharpen as well as Sepia/Grayscale
+filters
 
+Design/Model Changes
+- we added a ComplexIPModel interface and class that retains the functionality
+of the SimpleModel using a delegate.
+- we needed to add a helper to the SimpleIP model (getCurrentImage)
+- using a delegate allowed us to build off of our work from the previous homework,
+adding functionality needed in the Complex Model
 
-We used photos we took ourselves in tests so no need to cite anything.
+Assumptions
+- User uses only supported file formats
+- Base image must be added at Layer 0
+- layers must be added in order starting at 0
+- the Processor only conducts operations on the current
+  Layer
 
+Limitations
+
+List of Features
+-
+How to Run
+How to Use Program
+Example Runs
