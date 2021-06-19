@@ -1,18 +1,30 @@
 package controller;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Scanner;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import model.ComplexImageProcessorModel;
+import model.IImageLayer;
+import model.Image;
+import model.ImageLayer;
+import model.Pixel;
+import model.PixelColor;
 import model.SimpleImageProcessorModel;
 import view.ImageProcessorView;
 
 public class ImageProcessorController implements IPController {
-  ComplexImageProcessorModel model;
+  private ComplexImageProcessorModel model;
   private Scanner in;
-  Appendable ap;
+  private Appendable ap;
 
 
   public ImageProcessorController(ComplexImageProcessorModel model, InputStream in,
@@ -50,7 +62,7 @@ public class ImageProcessorController implements IPController {
             controller.go();
           }
           catch (IOException io) {
-            throw new IllegalArgumentException ("stupid idiot");
+            throw new IllegalArgumentException ("Invalid Text");
           }
           break;
 
@@ -59,7 +71,6 @@ public class ImageProcessorController implements IPController {
           int index = in.nextInt();
           if (index > this.model.getNumLayers() || index < 0) {
             renderMessageHelp(view,"invalid layer index\n");
-
             break;
           }
           this.model.createLayer(index);
@@ -83,7 +94,14 @@ public class ImageProcessorController implements IPController {
         case "load":
           // add functionality for multilayered image
           String fileName = in.next();
-          this.model.importImage(fileName);
+          //importHelp(fileName);
+          try {
+            this.model.importImage(fileName);
+          }
+          catch (IllegalArgumentException e) {
+            renderMessageHelp (view, "Image Wrong Size\n");
+            break;
+          }
           renderMessageHelp(view,fileName + " loaded to layer: "
               + this.model.getCurrentLayer() + "\n");
           break;
@@ -103,7 +121,7 @@ public class ImageProcessorController implements IPController {
         case "save":
           String fileNameSave = in.next();
 
-          this.model.exportTopVisibleLayer(in.next(), in.next());
+          this.model.exportTopVisibleLayer(fileNameSave, in.next());
           renderMessageHelp(view,fileNameSave + " Saved" + "\n");
 
           break;
@@ -164,6 +182,80 @@ public class ImageProcessorController implements IPController {
       }
     }
   }
+
+  private void importHelp(String fileName) {
+//need to think about what to do if there is already an Image in the layer
+    File fileIn;
+
+    String fileTag = fileName.substring(fileName.length() - 3);
+    if (fileTag.equals("ppm")) {
+      this.model.importImage(fileName);
+      int currentLayerIndex = this.model.getCurrentLayer();
+      IImageLayer current = this.model.getLayerAt(currentLayerIndex);
+      if (current.getImage() == null) {
+        current.replaceImage(this.model.getCurrentImage());
+      }
+      current.setFiletype(fileTag);
+      current.setName(fileName);
+
+    }
+
+    else {
+      try {
+
+        fileIn = new File(fileName);
+        ImageInputStream imStream = ImageIO.createImageInputStream(fileIn);
+        Iterator<ImageReader> imageReader = ImageIO.getImageReaders(imStream);
+        if (!imageReader.hasNext()) {
+          throw new RuntimeException ("reader error");
+        }
+        int currentLayerIndex = this.model.getCurrentLayer();
+        IImageLayer current = this.model.getLayerAt(currentLayerIndex);
+
+        ImageReader reader = imageReader.next();
+        current.setName(fileName);
+        current.setFiletype(reader.getFormatName()); //TODO: maybe get rid of field for file type
+        IImageLayer newImage = importHelper2(fileIn);/*
+        if (current.getImage() == null) {
+          current.replaceImage(this.model.getCurrentImage());
+        }*/
+        this.model.setLayer(newImage);
+        current.replaceImage(newImage.getImage());
+
+
+
+      } catch (FileNotFoundException e) {
+        throw new IllegalArgumentException("File " + fileName + " not found!");
+      } catch (IOException exception) {
+        exception.printStackTrace ();
+      }
+    }
+  }
+
+  private IImageLayer importHelper2(File fileIn) throws IOException {
+    BufferedImage BuffImage;
+    BuffImage = ImageIO.read(fileIn);
+    int w = BuffImage.getWidth();
+    int h = BuffImage.getHeight();
+
+    Pixel[][] pixArray = new Pixel[h][w];
+    for (int row = 0; row < h; row++) {
+      for (int col = 0; col < w; col++) {
+        Color thisColor = new Color(BuffImage.getRGB(col, row));
+
+        PixelColor pc = new PixelColor (thisColor.getRed (), thisColor.getGreen (),
+            thisColor.getBlue (), 0,255);
+        pixArray[row][col] = new Pixel (col,row,pc);
+      }
+    }
+
+    Image image = new Image (h,w,255,pixArray);
+    int currentLayerIndex = this.model.getCurrentLayer();
+    IImageLayer current = this.model.getLayerAt(currentLayerIndex);
+    IImageLayer imageLayer = new ImageLayer(image,fileIn.getName(), current.getFileType());
+    return imageLayer;
+  }
+
   private void renderMessageHelp(ImageProcessorView view, String string) {
     try {
       view.renderMessage(string);
