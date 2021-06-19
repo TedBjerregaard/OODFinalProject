@@ -303,18 +303,22 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
         token = reader.next();
 
         if (token.equals("IP3")) {
-          this.createLayer(current);
-          this.setCurrentLayer(current);
-          IImageLayer currentLayer = this.layers.get(current);
-          String visible = reader.next();
-          if (visible.equals("true")) {
-            currentLayer.makeInvisible();
+          int numLayers = reader.nextInt();
+          for (int i = 0; i < numLayers; i++ ) {
+            this.createLayer(current);
+            this.setCurrentLayer(current);
+            IImageLayer currentLayer = this.layers.get(current);
+            String visible = reader.next();
+            if (visible.equals("true")) {
+              currentLayer.makeInvisible();
+            }
+            if (visible.equals("false")) {
+              currentLayer.makeInvisible();
+            }
+            this.importImage(reader.next());
+            current ++;
           }
-          if (visible.equals("false")) {
-            currentLayer.makeInvisible();
-          }
-          this.importImage(reader.next());
-          current ++;
+
         }
         else {
           throw new IllegalArgumentException ("bad file format");
@@ -333,12 +337,15 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
   public void exportMultiLayeredImage(String fileName) {
 
     StringBuilder builder = new StringBuilder();
-    builder.append("IP3\n");
+    builder.append("IP3\n" + this.layers.size() +"\n");
     for (int i = 0; i < this.layers.size(); i++) {
       IImageLayer current = layers.get(i);
       builder.append(current.isVisible() + "\n");
       builder.append(current.getName() + "\n");
-      this.exportImage(current.getImage(), current.getName(), current.getFileType());
+      int lengthType = current.getFileType().length() + 1;
+      int lengthFileName = current.getName().length() - lengthType;
+      String fileExportName = current.getName().substring(0, lengthFileName);
+      this.exportImage(current.getImage(), fileExportName, current.getFileType());
 
       File multiLayeredLocations = new File(fileName);
       try {

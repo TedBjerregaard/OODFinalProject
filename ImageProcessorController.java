@@ -43,7 +43,11 @@ public class ImageProcessorController implements IPController {
           break;
 
         case "export":
+          this.model.exportMultiLayeredImage(in.next());
           //exports multilayered image as a text file
+
+        case "import":
+          this.model.importMultiLayeredImage(in.next());
 
         case "save":
           this.model.exportTopVisibleLayer(in.next(), in.next());

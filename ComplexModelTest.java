@@ -209,6 +209,36 @@ public class ComplexModelTest {
   }
 
   @Test
+  public void testExportAsPNG1() {
+    SimpleImageProcessorModel simpleModel = new SimpleImageProcessorModel();
+    ComplexImageProcessorModel model = new ComplexImageProcessorModel(simpleModel);
+    model.createLayer(0);
+    model.setCurrentLayer (0);
+    model.importImage("Checkerboard.ppm");
+
+    model.saveImageLayer(model.blur());
+    model.saveImageLayer(model.blur());
+    model.saveImageLayer(model.blur());
+    model.saveImageLayer(model.blur());
+    model.saveImageLayer(model.blur());
+
+
+
+
+    model.exportImage(model.getCurrentImage(), "CheckerboardBlurred", "png");
+
+    SimpleImageProcessorModel simpleModel2 = new SimpleImageProcessorModel();
+    ComplexImageProcessorModel model2 = new ComplexImageProcessorModel(simpleModel2);
+    model2.createLayer(0);
+    model2.setCurrentLayer(0);
+    model2.importImage("CheckerboardBlurred.png");
+    Image afterImage = model2.getCurrentImage();
+    assertEquals(30, afterImage.getHeight());
+    assertEquals(255, afterImage.getMaxColorVal());
+    assertEquals(30, afterImage.getWidth());
+    assertEquals(30, afterImage.pixelArray.length);
+  }
+  @Test
   public void testExportImportMultilayers() {
     SimpleImageProcessorModel simpleModel = new SimpleImageProcessorModel();
     ComplexImageProcessorModel model = new ComplexImageProcessorModel(simpleModel);
