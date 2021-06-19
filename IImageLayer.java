@@ -28,4 +28,10 @@ public interface IImageLayer {
 
   void setName(String name);
 
+  int getImageHeight();
+
+  int getImageWidth();
+
+
+
 }

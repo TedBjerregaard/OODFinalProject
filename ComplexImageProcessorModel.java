@@ -19,7 +19,9 @@ import javax.imageio.stream.ImageInputStream;
 public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
 
   private IPModel delegate;
-  int currentLayer;  //private
+  private int currentLayer;
+  private int height;
+  private int width;
   private List<IImageLayer> layers;
 
   public ComplexImageProcessorModel(IPModel delegate) {
@@ -136,17 +138,35 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
   @Override
   public void importImage(String fileName) {
 
+    //this.delegate.importImage(fileName);
+/*&& this.delegate.getCurrentImage().getHeight() ==
+        previous.getImageHeight() && this.delegate.getCurrentImage().getWidth() ==
+        previous.getImageWidth()*/
     File fileIn;
 
     String fileTag = fileName.substring(fileName.length() - 3);
     if (fileTag.equals("ppm")) {
       this.delegate.importImage(fileName);
       IImageLayer current = this.layers.get(this.currentLayer);
-      if (current.getImage() == null) {
-        current.replaceImage(this.delegate.getCurrentImage());
+      //IImageLayer previous = this.layers.get(this.currentLayer - 1);
+      if (current.getImage() == null ) {
+        Image newImage = this.delegate.getCurrentImage();
+        if (currentLayer == 0) {
+          this.width = newImage.getWidth();
+          this.height = newImage.getHeight();
+        }
+        else if (this.height != newImage.getHeight() || this.width != newImage.getWidth()) {
+
+          throw new IllegalArgumentException ("Image must match size ");
+        }
+        current.replaceImage(newImage);
+        current.setFiletype(fileTag);
+        current.setName(fileName);
       }
-      current.setFiletype(fileTag);
-      current.setName(fileName);
+      else {
+        throw new IllegalArgumentException ("Image not correct size");
+      }
+
 
     }
 
@@ -360,8 +380,17 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
     }
   }
 
+
+  public void setLayer(IImageLayer layer) {
+    this.layers.set(this.currentLayer, layer);
+  }
+
   public int getCurrentLayer() {
     return this.currentLayer;
+  }
+
+  public IImageLayer getLayerAt(int index) {
+    return this.layers.get(index);
   }
 
   public int getNumLayers() {

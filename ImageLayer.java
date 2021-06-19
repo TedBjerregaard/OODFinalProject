@@ -76,5 +76,15 @@ public class ImageLayer implements IImageLayer {
     this.name = name;
   }
 
+  @Override
+  public int getImageHeight(){
+    return this.image.getHeight();
+  }
+
+  @Override
+  public int getImageWidth(){
+    return this.image.getWidth();
+  }
+
 
 }
