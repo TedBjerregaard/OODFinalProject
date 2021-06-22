@@ -1,5 +1,7 @@
 package controller;
 
+import static java.awt.image.BufferedImage.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -108,6 +110,7 @@ public class ImageProcessorController implements IPController {
         case "load":
 
           String fileName = in.next();
+
           try {
             this.importImage(fileName);
           } catch (IllegalArgumentException e) {
@@ -262,7 +265,7 @@ public class ImageProcessorController implements IPController {
 
   private void importImage(String fileName) {
 
-    File fileIn;
+    FileInputStream fileIn;
 
     String fileTag = fileName.substring(fileName.length() - 3);
     if (fileTag.equals("ppm")) {
@@ -277,19 +280,24 @@ public class ImageProcessorController implements IPController {
     } else {
       try {
 
-        fileIn = new File(fileName);
+        fileIn = new FileInputStream(fileName);
         ImageInputStream imStream = ImageIO.createImageInputStream(fileIn);
         Iterator<ImageReader> imageReader = ImageIO.getImageReaders(imStream);
+
+        Image imported = importHelper(imStream);
+
         if (!imageReader.hasNext()) {
           throw new RuntimeException("reader error");
         }
+
         IImageLayer current = this.model.getCurrentLayer();
-        Image imported = importHelper(fileIn);
 
         this.checkWidthAndHeight(imported, current);
 
         ImageReader reader = imageReader.next();
         current.setName(fileName);
+
+        //maybe move this to importHelper
         current.setFiletype(reader.getFormatName()); //TODO: maybe get rid of field for file type
 
 
@@ -304,11 +312,16 @@ public class ImageProcessorController implements IPController {
     }
   }
 
-  private Image importHelper(File fileIn) throws IOException {
-    BufferedImage buffImage;
-    buffImage = ImageIO.read(fileIn);
+  private Image importHelper(ImageInputStream stream) throws IOException {
+
+    BufferedImage buffImage = ImageIO.read(stream);
     int w = buffImage.getWidth();
     int h = buffImage.getHeight();
+    buffImage = new BufferedImage(w,h,
+        TYPE_INT_RGB);
+
+
+
 
     Pixel[][] pixArray = new Pixel[h][w];
     for (int row = 0; row < h; row++) {
@@ -383,18 +396,14 @@ public class ImageProcessorController implements IPController {
   }
 
   private void checkWidthAndHeight(Image image, IImageLayer current) {
-    if (current.getImage() == null) {
-      if (this.model.getCurrentLayerIndex() == 0) {
-        int w = image.getWidth();
-        int h = image.getHeight();
-        this.model.setWidth(w);
-        this.model.setHeight(h);
-      } else if (this.model.getHeight() != image.getHeight()
-          || this.model.getWidth() != image.getWidth()) {
-        throw new IllegalArgumentException("Image must match size ");
-      }
-    } else {
-      throw new IllegalArgumentException("Image not correct size");
+    if (this.model.getCurrentLayerIndex() == 0) {
+      int w = image.getWidth();
+      int h = image.getHeight();
+      this.model.setWidth(w);
+      this.model.setHeight(h);
+    } else if (this.model.getHeight() != image.getHeight()
+        || this.model.getWidth() != image.getWidth()) {
+      throw new IllegalArgumentException("Image must match size ");
     }
   }
 
@@ -445,7 +454,7 @@ public class ImageProcessorController implements IPController {
 
       File file = new File(finalFileName);
       BufferedImage buff = new BufferedImage(image.getHeight(), image.getWidth(),
-          BufferedImage.TYPE_INT_RGB);
+          TYPE_INT_RGB);
       for (int row = 0; row < image.getHeight(); row++) {
         for (int col = 0; col < image.getWidth(); col++) {
           Pixel currentPix = image.getPixel(row, col);
