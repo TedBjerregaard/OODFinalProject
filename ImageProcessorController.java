@@ -5,9 +5,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -15,18 +19,29 @@ import javax.imageio.stream.ImageInputStream;
 import model.ComplexImageProcessorModel;
 import model.IImageLayer;
 import model.Image;
-import model.ImageLayer;
 import model.Pixel;
 import model.PixelColor;
 import model.SimpleImageProcessorModel;
 import view.ImageProcessorView;
 
+/**
+ * A controller used in the implementation of an image processor. Able to process images with manual
+ * text commands, or with batch commands through text files.
+ */
 public class ImageProcessorController implements IPController {
+
   private ComplexImageProcessorModel model;
   private Scanner in;
   private Appendable ap;
 
 
+  /**
+   * Constructor for the ImageProcessorController class.
+   *
+   * @param model Model used in this implementation.
+   * @param in    InputStream from the user, either manual text or text file.
+   * @param out   Output user sees through the view.
+   */
   public ImageProcessorController(ComplexImageProcessorModel model, InputStream in,
       Appendable out) {
     this.model = model;
@@ -37,7 +52,7 @@ public class ImageProcessorController implements IPController {
 
 
   @Override
-  public void go() {
+  public void runIP() {
 
     ImageProcessorView view = new ImageProcessorView(this.ap);
     boolean quit = false;
@@ -55,81 +70,81 @@ public class ImageProcessorController implements IPController {
           File inFile = new File(filename);
           try {
             SimpleImageProcessorModel simpleModel = new SimpleImageProcessorModel();
-            ComplexImageProcessorModel ComplexModel = new ComplexImageProcessorModel(simpleModel);
-            InputStream targetStream = new FileInputStream (inFile);
-            IPController controller = new ImageProcessorController(ComplexModel, targetStream,
+            ComplexImageProcessorModel complexModel = new ComplexImageProcessorModel(simpleModel);
+            InputStream targetStream = new FileInputStream(inFile);
+            IPController controller = new ImageProcessorController(complexModel, targetStream,
                 System.out);
-            controller.go();
-          }
-          catch (IOException io) {
-            throw new IllegalArgumentException ("Invalid Text");
+            controller.runIP();
+          } catch (IOException io) {
+            throw new IllegalArgumentException("run failed");
           }
           break;
-
 
         case "create":
           int index = in.nextInt();
           if (index > this.model.getNumLayers() || index < 0) {
-            renderMessageHelp(view,"invalid layer index\n");
+            renderMessageHelp(view, "invalid layer index\n");
+
             break;
           }
           this.model.createLayer(index);
           this.model.setCurrentLayer(index);
-          renderMessageHelp(view,"layer " + this.model.getCurrentLayer() + " created\n");
-          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayer()
+          renderMessageHelp(view, "layer " + this.model.getCurrentLayerIndex() + " created\n");
+          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayerIndex()
               + "\n Layers in IP: " + this.model.getNumLayers() + "\n");
           break;
 
         case "current":
           int currentIndex = in.nextInt();
           if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
-            renderMessageHelp(view,"invalid layer index\n");
+            renderMessageHelp(view, "invalid layer index\n");
             break;
           }
           this.model.setCurrentLayer(currentIndex);
-          renderMessageHelp(view,"Current Layer: " + this.model.getCurrentLayer() + "\n");
+          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayerIndex() + "\n");
 
           break;
 
         case "load":
-          // add functionality for multilayered image
+
           String fileName = in.next();
-          //importHelp(fileName);
           try {
-            this.model.importImage(fileName);
-          }
-          catch (IllegalArgumentException e) {
-            renderMessageHelp (view, "Image Wrong Size\n");
+            this.importImage(fileName);
+          } catch (IllegalArgumentException e) {
+            renderMessageHelp(view, "Image Wrong Size\n");
             break;
           }
-          renderMessageHelp(view,fileName + " loaded to layer: "
-              + this.model.getCurrentLayer() + "\n");
+
+          renderMessageHelp(view, fileName + " loaded to layer: "
+              + this.model.getCurrentLayerIndex() + "\n");
           break;
 
         case "export":
           String fileNameExport = in.next();
-          this.model.exportMultiLayeredImage(fileNameExport);
-          renderMessageHelp(view,fileNameExport + " Exported" + "\n");
-          //exports multilayered image as a text file
+          this.exportMultiLayeredImage(fileNameExport);
+          renderMessageHelp(view, fileNameExport + " Exported" + "\n");
+          break;
 
         case "import":
           String fileNameImport = in.next();
-          this.model.importMultiLayeredImage(fileNameImport);
-          renderMessageHelp(view,fileNameImport + " Imported" + "\n");
-
+          this.importMultiLayeredImage(fileNameImport);
+          renderMessageHelp(view, fileNameImport + " Imported" + "\n");
+          break;
 
         case "save":
           String fileNameSave = in.next();
+          String fileTypeSave = in.next();
 
-          this.model.exportTopVisibleLayer(fileNameSave, in.next());
-          renderMessageHelp(view,fileNameSave + " Saved" + "\n");
+          IImageLayer topVisible = this.model.getTopVisibleLayer();
+          this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
+          renderMessageHelp(view, fileNameSave + " Saved" + "\n");
 
           break;
 
         case "copy":
           int layerIndex = in.nextInt();
           this.model.copyCurrentLayer(layerIndex);
-          renderMessageHelp(view,"Layer Copied to: " + layerIndex + "\n");
+          renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
 
           break;
 
@@ -141,127 +156,349 @@ public class ImageProcessorController implements IPController {
 
         case "visible":
           this.model.makeInvisible();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Visible"
-              + "\n");
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+              " is now Visible" + "\n");
           break;
 
         case "invisible":
           this.model.makeVisible();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Invisible"
-              + "\n");
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex()
+              + " is now Invisible" + "\n");
 
           break;
 
         case "sepia":
           this.model.applySepia();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Sepia"
-              + "\n");
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+              " Sepia applied" + "\n");
 
           break;
 
         case "greyscale":
           this.model.applyGreyscale();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Greyscale"
-              + "\n");
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+              " Greyscale applied" + "\n");
 
           break;
 
         case "blur":
           this.model.blur();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Blurred"
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
               + "\n");
 
           break;
 
         case "sharpen":
           this.model.sharpen();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayer() + " Sharpened"
-              + "\n");
-
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+              " Sharpen applied" + "\n");
           break;
+
+        case "createImage":
+          int tileSize = in.nextInt();
+          int numTiles = in.nextInt();
+          int color1Red = in.nextInt();
+          int color1Green = in.nextInt();
+          int color1Blue = in.nextInt();
+          int color1MaxVal = in.nextInt();
+          int color1MinVal = in.nextInt();
+          int color2Red = in.nextInt();
+          int color2Green = in.nextInt();
+          int color2Blue = in.nextInt();
+          int color2MaxVal = in.nextInt();
+          int color2MinVal = in.nextInt();
+          PixelColor color1 = new PixelColor(color1Red, color1Green, color1Blue, color1MaxVal,
+              color1MinVal);
+          PixelColor color2 = new PixelColor(color2Red, color2Green, color2Blue, color2MaxVal,
+              color2MinVal);
+          int maxColorVal = in.nextInt();
+          this.model.createImage(tileSize, numTiles, color1, color2, maxColorVal);
+          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " " + numTiles +
+              " x " + numTiles + "tile Checkerboard image created" + "\n");
+          break;
+
+        default:
+          renderMessageHelp(view, "Not a supported command. Try again." + "\n");
       }
     }
   }
 
-  private void importHelp(String fileName) {
-//need to think about what to do if there is already an Image in the layer
+  private void importMultiLayeredImage(String fileName) {
+
+    try {
+      File toImport = new File(fileName);
+      Scanner reader = new Scanner(toImport);
+      int current = 0;
+      String token;
+
+      while (reader.hasNext()) {
+        token = reader.next();
+
+        if (token.equals("IP3")) {
+          int numLayers = reader.nextInt();
+          for (int i = 0; i < numLayers; i++) {
+            this.model.createLayer(current);
+            this.model.setCurrentLayer(current);
+            IImageLayer currentLayer = this.model.getLayerAt(current);
+            String visible = reader.next();
+            if (visible.equals("true")) {
+              currentLayer.makeVisible();
+            }
+            if (visible.equals("false")) {
+              currentLayer.makeInvisible();
+            }
+            this.importImage(reader.next());
+            current++;
+          }
+
+        } else {
+          throw new IllegalArgumentException("bad file format");
+        }
+      }
+    } catch (IOException io) {
+      //
+    }
+  }
+
+  private void importImage(String fileName) {
+
     File fileIn;
 
     String fileTag = fileName.substring(fileName.length() - 3);
     if (fileTag.equals("ppm")) {
-      this.model.importImage(fileName);
-      int currentLayerIndex = this.model.getCurrentLayer();
-      IImageLayer current = this.model.getLayerAt(currentLayerIndex);
-      if (current.getImage() == null) {
-        current.replaceImage(this.model.getCurrentImage());
-      }
+      Image newImage = this.importPPM(fileName);
+      IImageLayer current = this.model.getCurrentLayer();
+
+      this.checkWidthAndHeight(newImage, current);
+      current.replaceImage(newImage);
       current.setFiletype(fileTag);
       current.setName(fileName);
 
-    }
-
-    else {
+    } else {
       try {
 
         fileIn = new File(fileName);
         ImageInputStream imStream = ImageIO.createImageInputStream(fileIn);
         Iterator<ImageReader> imageReader = ImageIO.getImageReaders(imStream);
         if (!imageReader.hasNext()) {
-          throw new RuntimeException ("reader error");
+          throw new RuntimeException("reader error");
         }
-        int currentLayerIndex = this.model.getCurrentLayer();
-        IImageLayer current = this.model.getLayerAt(currentLayerIndex);
+        IImageLayer current = this.model.getCurrentLayer();
+        Image imported = importHelper(fileIn);
+
+        this.checkWidthAndHeight(imported, current);
 
         ImageReader reader = imageReader.next();
         current.setName(fileName);
         current.setFiletype(reader.getFormatName()); //TODO: maybe get rid of field for file type
-        IImageLayer newImage = importHelper2(fileIn);/*
-        if (current.getImage() == null) {
-          current.replaceImage(this.model.getCurrentImage());
-        }*/
-        this.model.setLayer(newImage);
-        current.replaceImage(newImage.getImage());
 
+
+        current.replaceImage(imported);
 
 
       } catch (FileNotFoundException e) {
         throw new IllegalArgumentException("File " + fileName + " not found!");
       } catch (IOException exception) {
-        exception.printStackTrace ();
+        exception.printStackTrace();
       }
     }
   }
 
-  private IImageLayer importHelper2(File fileIn) throws IOException {
-    BufferedImage BuffImage;
-    BuffImage = ImageIO.read(fileIn);
-    int w = BuffImage.getWidth();
-    int h = BuffImage.getHeight();
+  private Image importHelper(File fileIn) throws IOException {
+    BufferedImage buffImage;
+    buffImage = ImageIO.read(fileIn);
+    int w = buffImage.getWidth();
+    int h = buffImage.getHeight();
 
     Pixel[][] pixArray = new Pixel[h][w];
     for (int row = 0; row < h; row++) {
       for (int col = 0; col < w; col++) {
-        Color thisColor = new Color(BuffImage.getRGB(col, row));
+        Color thisColor = new Color(buffImage.getRGB(col, row));
 
-        PixelColor pc = new PixelColor (thisColor.getRed (), thisColor.getGreen (),
-            thisColor.getBlue (), 0,255);
-        pixArray[row][col] = new Pixel (col,row,pc);
+        PixelColor pc = new PixelColor(thisColor.getRed(), thisColor.getGreen(),
+            thisColor.getBlue(), 0, 255);
+        pixArray[row][col] = new Pixel(col, row, pc);
       }
     }
 
-    Image image = new Image (h,w,255,pixArray);
-    int currentLayerIndex = this.model.getCurrentLayer();
-    IImageLayer current = this.model.getLayerAt(currentLayerIndex);
-    IImageLayer imageLayer = new ImageLayer(image,fileIn.getName(), current.getFileType());
-    return imageLayer;
+    return new Image(h, w, 255, pixArray);
   }
+
+
+  private Image importPPM(String filename) throws IllegalArgumentException {
+
+    Scanner sc;
+
+    try {
+      sc = new Scanner(new FileInputStream(filename));
+    } catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("File " + filename + " not found!");
+    }
+    StringBuilder builder = new StringBuilder();
+    //read the file line by line, and populate a string. This will throw away any comment lines
+    while (sc.hasNextLine()) {
+      String s = sc.nextLine();
+      if (s.charAt(0) != '#') {
+        builder.append(s + System.lineSeparator());
+      }
+    }
+
+    //now set up the scanner to read from the string we just built
+    sc = new Scanner(builder.toString());
+
+    String token;
+
+    token = sc.next();
+    if (!token.equals("P3")) {
+      throw new IllegalArgumentException("Invalid PPM file: plain RAW file should begin with P3");
+    }
+    int width = sc.nextInt();
+    int height = sc.nextInt();
+    int maxValue = sc.nextInt();
+
+    int minColorVal = 0;
+
+    List<Pixel> pixels = new ArrayList<>();
+
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        int r = sc.nextInt();
+        int g = sc.nextInt();
+        int b = sc.nextInt();
+        Pixel toAdd = new Pixel(row, col, new PixelColor(r, g, b, maxValue, minColorVal));
+        pixels.add(toAdd);
+      }
+    }
+
+    int current = 0;
+    Pixel[][] pixelArray = new Pixel[height][width];
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        pixelArray[row][col] = pixels.get(current);
+        current++;
+      }
+    }
+
+    return new Image(height, width, maxValue, pixelArray);
+  }
+
+  private void checkWidthAndHeight(Image image, IImageLayer current) {
+    if (current.getImage() == null) {
+      if (this.model.getCurrentLayerIndex() == 0) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        this.model.setWidth(w);
+        this.model.setHeight(h);
+      } else if (this.model.getHeight() != image.getHeight()
+          || this.model.getWidth() != image.getWidth()) {
+        throw new IllegalArgumentException("Image must match size ");
+      }
+    } else {
+      throw new IllegalArgumentException("Image not correct size");
+    }
+  }
+
 
   private void renderMessageHelp(ImageProcessorView view, String string) {
     try {
       view.renderMessage(string);
-    }
-    catch (IOException io) {
+    } catch (IOException io) {
       throw new IllegalStateException("error rendering message");
     }
   }
+
+  private void exportMultiLayeredImage(String fileName) {
+
+    StringBuilder builder = new StringBuilder();
+    builder.append("IP3\n" + this.model.getNumLayers() + "\n");
+    for (int i = 0; i < this.model.getNumLayers(); i++) {
+      IImageLayer current = this.model.getLayerAt(i);
+      builder.append(current.isVisible() + "\n");
+      builder.append(current.getName() + "\n");
+      int lengthType = current.getFileType().length() + 1;
+      int lengthFileName = current.getName().length() - lengthType;
+      String fileExportName = current.getName().substring(0, lengthFileName);
+      this.exportImage(current.getImage(), fileExportName, current.getFileType());
+
+      File multiLayeredLocations = new File(fileName);
+      try {
+        FileWriter writer = new FileWriter(multiLayeredLocations);
+        writer.write(builder.toString());
+        writer.flush();
+        writer.close();
+      } catch (IOException io) {
+        throw new IllegalArgumentException("cannot create text file");
+      }
+    }
+  }
+
+
+
+
+
+  public void exportImage(Image image, String fileName, String fileType) {
+
+    if (fileType.equals("ppm")) {
+      this.exportPPM(image, fileName, fileType);
+    } else {
+      String finalFileName = fileName + "." + fileType;
+
+      File file = new File(finalFileName);
+      BufferedImage buff = new BufferedImage(image.getHeight(), image.getWidth(),
+          BufferedImage.TYPE_INT_RGB);
+      for (int row = 0; row < image.getHeight(); row++) {
+        for (int col = 0; col < image.getWidth(); col++) {
+          Pixel currentPix = image.getPixel(row, col);
+          PixelColor pixColor = currentPix.getColor();
+          Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
+              pixColor.getBlue());
+          int colorInt = currentColor.getRGB();
+          buff.setRGB(row, col, colorInt);
+        }
+      }
+      try {
+        ImageIO.write(buff, fileType, file);
+      } catch (IOException e) {
+        throw new IllegalArgumentException("check filetype");
+      }
+    }
+  }
+
+
+
+
+
+  private void exportPPM(Image image, String fileName, String fileType) {
+    File file;
+    String finalFileName = fileName + "." + fileType;
+    FileOutputStream fStream = null;
+    String imageValues = image.getImageValues(finalFileName);
+
+    try {
+      file = new File(finalFileName);
+      fStream = new FileOutputStream(file);
+
+      if (!file.exists()) {
+        file.createNewFile();
+      }
+      byte[] bArray = imageValues.getBytes();
+
+      fStream.write(bArray);
+      fStream.flush();
+    } catch (IOException e) {
+      //
+    }
+
+    try {
+      if (fStream != null) {
+        fStream.close();
+      }
+    } catch (IOException e) {
+      //
+    }
+  }
+
+
+
+
 }
