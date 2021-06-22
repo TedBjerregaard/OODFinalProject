@@ -1,24 +1,29 @@
 package view;
 
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class SwingFrame extends JFrame implements ActionListener, ItemListener,
     ListSelectionListener {
@@ -26,10 +31,11 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
   private JScrollPane mainScrollPane;
   private JLabel fileOpenDisplay;
   private JLabel fileSaveDisplay;
+  private JCheckBoxMenuItem layers;
 
   public SwingFrame() {
     super();
-    setTitle("Swing features");
+    setTitle("Image Processor");
     setSize(400, 400);
 
     mainPanel = new JPanel();
@@ -41,14 +47,43 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
 
     //dialog boxes
     JPanel dialogBoxesPanel = new JPanel();
-    dialogBoxesPanel.setBorder(BorderFactory.createTitledBorder("Import/Save, Apply a filter, "
-        + "sharpen/blur"));
+    dialogBoxesPanel.setBorder(BorderFactory.createTitledBorder("Import/Save/Current"));
     dialogBoxesPanel.setLayout(new BoxLayout(dialogBoxesPanel, BoxLayout.PAGE_AXIS));
     mainPanel.add(dialogBoxesPanel);
 
+    //file open
+    JPanel fileOpenPanel = new JPanel();
+    fileOpenPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(fileOpenPanel);
+    JButton fileOpenButton = new JButton("Open a file");
+    fileOpenButton.setActionCommand("open file");
+    fileOpenButton.addActionListener(this);
+    fileOpenPanel.add(fileOpenButton);
+
+    //file save
+    JPanel fileSavePanel = new JPanel();
+    fileSavePanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(fileSavePanel);
+    JButton fileSaveButton = new JButton("Save a file");
+    fileSaveButton.setActionCommand("save file");
+    fileSaveButton.addActionListener(this);
+    fileSavePanel.add(fileSaveButton);
+
+    //create layer
+    JPanel createLayerPanel = new JPanel();
+    createLayerPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(createLayerPanel);
+    JButton createLayerButton = new JButton("Create a Layer");
+    createLayerButton.setActionCommand("create layer");
+    createLayerButton.addActionListener(this);
+    createLayerPanel.add(createLayerButton);
+
+    //set current layer
+    JComboBox layers = new JComboBox();
 
     //Filter Transformations
     JPanel filterPanel = new JPanel();
+    filterPanel.setBorder(BorderFactory.createTitledBorder("Filter"));
     filterPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(filterPanel);
 
@@ -73,46 +108,27 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
     filterPanel.add(sharpen);
     mainPanel.add(filterPanel);
 
-    //file open
-    JPanel fileopenPanel = new JPanel();
-    fileopenPanel.setLayout(new FlowLayout());
-    dialogBoxesPanel.add(fileopenPanel);
-    JButton fileOpenButton = new JButton("Open a file");
-    fileOpenButton.setActionCommand("Open file");
-    fileOpenButton.addActionListener(this);
-    fileopenPanel.add(fileOpenButton);
-    fileOpenDisplay = new JLabel("File path will appear here");
-    fileopenPanel.add(fileOpenDisplay);
-
-    //file save
-    JPanel filesavePanel = new JPanel();
-    filesavePanel.setLayout(new FlowLayout());
-    dialogBoxesPanel.add(filesavePanel);
-    JButton fileSaveButton = new JButton("Save a file");
-    fileSaveButton.setActionCommand("Save file");
-    fileSaveButton.addActionListener(this);
-    filesavePanel.add(fileSaveButton);
-    fileSaveDisplay = new JLabel("File path will appear here");
-    filesavePanel.add(fileSaveDisplay);
 
     //show an image with a scrollbar
     JPanel imagePanel = new JPanel();
     //a border around the panel with a caption
     imagePanel.setBorder(BorderFactory.createTitledBorder("Showing an image"));
     imagePanel.setLayout(new GridLayout(1, 0, 10, 10));
+/*
+
+    BufferedImage image = ImageIO.read(new File(String.valueOf(this.fileOpenDisplay)));
+    JLabel label = new JLabel(new ImageIcon(image));
+    imagePanel.add(label);
+*/
+
     //imagePanel.setMaximumSize(null);
     mainPanel.add(imagePanel);
 
-    String[] images = {"Jellyfish.jpg", "Koala.jpg", "Penguins.jpg"};
-    JLabel[] imageLabel = new JLabel[images.length];
-    JScrollPane[] imageScrollPane = new JScrollPane[images.length];
-    for (int i = 0; i < imageLabel.length; i++) {
-      imageLabel[i] = new JLabel();
-      imageScrollPane[i] = new JScrollPane(imageLabel[i]);
-      imageLabel[i].setIcon(new ImageIcon(images[i]));
-      imageScrollPane[i].setPreferredSize(new Dimension(100, 600));
-      imagePanel.add(imageScrollPane[i]);
-    }
+    String image = "Penguins.jpg";
+    JLabel imageLabel;
+    imageLabel = new JLabel();
+    imageLabel.setIcon(new ImageIcon(image));
+
 
   }
 
@@ -126,8 +142,25 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
 
     switch (e.getActionCommand()) {
 
-      case "Open file":
-      case "Save file":
+      case "open file":
+        final JFileChooser openChooser = new JFileChooser(".");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "JPG & GIF Images", "jpg", "gif");
+        openChooser.setFileFilter(filter);
+        int retvalue = openChooser.showOpenDialog(SwingFrame.this);
+        if (retvalue == JFileChooser.APPROVE_OPTION) {
+          File f = openChooser.getSelectedFile();
+          fileOpenDisplay.setText(f.getAbsolutePath());
+        }
+        break;
+      case "save file":
+        final JFileChooser saveChooser = new JFileChooser(".");
+        int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
+        if (chooserRetvalue == JFileChooser.APPROVE_OPTION) {
+          File f = saveChooser.getSelectedFile();
+          fileSaveDisplay.setText(f.getAbsolutePath());
+        }
+        break;
       case "sharpen":
       case "blur":
       case "sepia":
@@ -144,7 +177,6 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
    */
   @Override
   public void itemStateChanged(ItemEvent e) {
-    String who = ((JCheckBox) e.getItemSelectable()).getActionCommand();
 
   }
 
