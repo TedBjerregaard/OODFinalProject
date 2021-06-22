@@ -1,0 +1,11 @@
+create 0
+current 0
+load Checkerboard.ppm
+sepia
+save checkSepia ppm
+create 1
+current 1
+load Checkerboard.ppm
+greyscale
+save gscaleCheck ppm
+quit

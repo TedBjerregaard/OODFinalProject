@@ -1,0 +1,8 @@
+IP3
+3
+true
+Checkerboard.ppm
+true
+Checkerboard.ppm
+true
+CheckerboardBlurred.png

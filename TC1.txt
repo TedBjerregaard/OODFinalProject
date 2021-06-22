@@ -1,0 +1,35 @@
+create 0
+create 1
+create 2
+create 3
+current 0
+load Coffee.ppm
+copy 1
+sharpen
+sepia
+current 1
+invisible
+current 2
+invisible
+current 3
+invisible
+current 0
+save SepCoffee ppm
+current 2
+load Coffee.ppm
+current 1
+visible
+current 3
+remove 3
+current 2
+greyscale
+save greyCof ppm
+export allLayers
+import allLayers.txt
+current 2 
+invisible
+current 1
+visible
+save grey ppm
+export allLayers2
+quit

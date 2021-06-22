@@ -1,0 +1,14 @@
+create 0
+current 0
+load airplane.png
+create 1 
+current 1
+load airplane.png
+sepia
+save sepiaplane png
+create 2 
+current 2
+load airplane.png
+greyscale 
+save greyplane png
+quit
