@@ -13,24 +13,29 @@ import java.util.Scanner;
 
 
 /**
- * A simple model for an model.Image Processor. This model is able to perform several operations to an
- * image with a corresponding file name. Operations included currently include: Producing filtered
- * images (blurred and sharpened). Producing images with after applying a given color transformation
- * (Sepia and Greyscale). Importing images (PPM format). Exporting images (PPM format).
+ * A simple model for an model.Image Processor. This model is able to perform several operations to
+ * an image with a corresponding file name. Operations included currently include: Producing
+ * filtered images (blurred and sharpened). Producing images with after applying a given color
+ * transformation (Sepia and Greyscale). Importing images (PPM format). Exporting images (PPM
+ * format).
  */
 public class SimpleImageProcessorModel implements IPModel {
 
   public Image image;
 
-  /**
+/*
+  */
+/**
    * Creates a model for processing images given a string representing the name of an image to be
    * imported.
    *
    * @param fileName String representing an model.Image to be imported to the model.
-   */
+   *//*
+
   public SimpleImageProcessorModel(String fileName) {
     importImage(fileName);
   }
+*/
 
 
   //Added a new constructor taking in a Image
@@ -135,100 +140,9 @@ public class SimpleImageProcessorModel implements IPModel {
   }
 
 
-  @Override
-  public void importImage(String filename) throws IllegalArgumentException {
-
-    Scanner sc;
-
-    try {
-      sc = new Scanner(new FileInputStream(filename));
-    } catch (FileNotFoundException e) {
-      throw new IllegalArgumentException("File " + filename + " not found!");
-    }
-    StringBuilder builder = new StringBuilder();
-    //read the file line by line, and populate a string. This will throw away any comment lines
-    while (sc.hasNextLine()) {
-      String s = sc.nextLine();
-      if (s.charAt(0) != '#') {
-        builder.append(s + System.lineSeparator());
-      }
-    }
-
-    //now set up the scanner to read from the string we just built
-    sc = new Scanner(builder.toString());
-
-    String token;
-
-    token = sc.next();
-    if (!token.equals("P3")) {
-      throw new IllegalArgumentException("Invalid PPM file: plain RAW file should begin with P3");
-    }
-    int width = sc.nextInt();
-    int height = sc.nextInt();
-    int maxValue = sc.nextInt();
-
-    int minColorVal = 0;
-
-    List<Pixel> pixels = new ArrayList<>();
-
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
-        int r = sc.nextInt();
-        int g = sc.nextInt();
-        int b = sc.nextInt();
-        Pixel toAdd = new Pixel(row, col, new PixelColor(r, g, b, maxValue, minColorVal));
-        pixels.add(toAdd);
-      }
-    }
-
-    int current = 0;
-    Pixel[][] pixelArray = new Pixel[height][width];
-    for (int row = 0; row < height; row++) {
-      for (int col = 0; col < width; col++) {
-        pixelArray[row][col] = pixels.get(current);
-        current++;
-      }
-    }
-
-    this.image = new Image(height, width, maxValue, pixelArray);
-  }
-
-  @Override
-  public void exportImage(Image image, String fileName, String fileType) {
-    File file;
-    String finalFileName = fileName + "." + fileType;
-    FileOutputStream fStream = null;
-    String imageValues = image.getImageValues(finalFileName);
-
-    try {
-      file = new File(finalFileName);
-      fStream = new FileOutputStream(file);
-
-      if (!file.exists()) {
-        file.createNewFile();
-      }
-      byte[] bArray = imageValues.getBytes();
-
-      fStream.write(bArray);
-      fStream.flush();
-    } catch (IOException e) {
-      //
-    }
-
-    try {
-      if (fStream != null) {
-        fStream.close();
-      }
-    } catch (IOException e) {
-      //
-    }
-  }
-
-  //added for complex import method
   public Image getCurrentImage() {
     return this.image;
   }
-
 
 }
 

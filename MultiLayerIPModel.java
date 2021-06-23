@@ -72,23 +72,6 @@ public interface MultiLayerIPModel {
    */
   void makeVisible();
 
-  /**
-   * Imports the given multilayered image from a text file and sets the layers of the model equal to
-   * those of the multilayered image.
-   *
-   * @param fileName Text file storing information needed to import this multilayered image.
-   *                 Specifically, information about the different layers and their location.
-   */
-  void importMultiLayeredImage(String fileName);
-
-  /**
-   * Exports a multilayered image to a text file and exports the images at the different layers of
-   * the multilayered image with their given name and file type.
-   *
-   * @param fileName Name of the text file exported storing information
-   *                 about the multilayered image.
-   */
-  void exportMultiLayeredImage(String fileName);
 
   /**
    * Returns the current layer of this ComplexImageProcessorModel.
@@ -115,5 +98,6 @@ public interface MultiLayerIPModel {
   int getWidth();
 
   IImageLayer getLayerAt(int i);
+
 
 }

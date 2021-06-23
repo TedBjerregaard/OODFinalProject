@@ -71,7 +71,7 @@ public class ImageProcessorController implements IPController, IViewListener {
     ImageProcessorView view = new ImageProcessorView(this.ap);
     boolean quit = false;
 
-    while (!quit) {
+    while (!quit && in.hasNext()) {
       String command = in.next();
       switch (command) {
         case "quit":
