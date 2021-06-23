@@ -3,7 +3,10 @@ package controller;
 import static java.awt.image.BufferedImage.*;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +17,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -24,15 +28,19 @@ import model.Image;
 import model.Pixel;
 import model.PixelColor;
 import model.SimpleImageProcessorModel;
+import view.IPView;
+import view.IViewListener;
 import view.ImageProcessorView;
+import view.SwingFrame;
 
 /**
  * A controller used in the implementation of an image processor. Able to process images with manual
  * text commands, or with batch commands through text files.
  */
-public class ImageProcessorController implements IPController {
+public class ImageProcessorController implements IPController, IViewListener {
 
   private ComplexImageProcessorModel model;
+  private IPView view;
   private Scanner in;
   private Appendable ap;
 
@@ -45,10 +53,14 @@ public class ImageProcessorController implements IPController {
    * @param out   Output user sees through the view.
    */
   public ImageProcessorController(ComplexImageProcessorModel model, InputStream in,
-      Appendable out) {
+      Appendable out, IPView view) {
     this.model = model;
     this.in = new Scanner(in);
     this.ap = out;
+    this.view = Objects.requireNonNull(view);
+    this.view.registerViewEventListener(this);
+
+
 
   }
 
@@ -75,7 +87,7 @@ public class ImageProcessorController implements IPController {
             ComplexImageProcessorModel complexModel = new ComplexImageProcessorModel(simpleModel);
             InputStream targetStream = new FileInputStream(inFile);
             IPController controller = new ImageProcessorController(complexModel, targetStream,
-                System.out);
+                System.out,this.view);
             controller.runIP();
           } catch (IOException io) {
             throw new IllegalArgumentException("run failed");
@@ -83,12 +95,12 @@ public class ImageProcessorController implements IPController {
           break;
 
         case "create":
-          int index = in.nextInt();
-          if (index > this.model.getNumLayers() || index < 0) {
+          int index = this.model.getNumLayers();
+         /* if (index > this.model.getNumLayers() || index < 0) {
             renderMessageHelp(view, "invalid layer index\n");
 
             break;
-          }
+          }*/
           this.model.createLayer(index);
           this.model.setCurrentLayer(index);
           renderMessageHelp(view, "layer " + this.model.getCurrentLayerIndex() + " created\n");
@@ -280,11 +292,15 @@ public class ImageProcessorController implements IPController {
     } else {
       try {
 
+        BufferedImage buffImage = ImageIO.read(new File(fileName));
+
+
         fileIn = new FileInputStream(fileName);
+
         ImageInputStream imStream = ImageIO.createImageInputStream(fileIn);
         Iterator<ImageReader> imageReader = ImageIO.getImageReaders(imStream);
 
-        Image imported = importHelper(imStream);
+        Image imported = importHelper(buffImage);
 
         if (!imageReader.hasNext()) {
           throw new RuntimeException("reader error");
@@ -312,13 +328,11 @@ public class ImageProcessorController implements IPController {
     }
   }
 
-  private Image importHelper(ImageInputStream stream) throws IOException {
+  private Image importHelper(BufferedImage buffImage) throws IOException {
 
-    BufferedImage buffImage = ImageIO.read(stream);
+
     int w = buffImage.getWidth();
     int h = buffImage.getHeight();
-    buffImage = new BufferedImage(w,h,
-        TYPE_INT_RGB);
 
 
 
@@ -329,7 +343,7 @@ public class ImageProcessorController implements IPController {
         Color thisColor = new Color(buffImage.getRGB(col, row));
 
         PixelColor pc = new PixelColor(thisColor.getRed(), thisColor.getGreen(),
-            thisColor.getBlue(), 0, 255);
+            thisColor.getBlue(), 255, 0);
         pixArray[row][col] = new Pixel(col, row, pc);
       }
     }
@@ -453,16 +467,16 @@ public class ImageProcessorController implements IPController {
       String finalFileName = fileName + "." + fileType;
 
       File file = new File(finalFileName);
-      BufferedImage buff = new BufferedImage(image.getHeight(), image.getWidth(),
+      BufferedImage buff = new BufferedImage(image.getWidth(),image.getHeight(),
           TYPE_INT_RGB);
-      for (int row = 0; row < image.getHeight(); row++) {
-        for (int col = 0; col < image.getWidth(); col++) {
+      for (int row = 0; row < buff.getHeight(); row++) {
+        for (int col = 0; col < buff.getWidth(); col++) {
           Pixel currentPix = image.getPixel(row, col);
           PixelColor pixColor = currentPix.getColor();
           Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
               pixColor.getBlue());
           int colorInt = currentColor.getRGB();
-          buff.setRGB(row, col, colorInt);
+          buff.setRGB(col, row, colorInt);
         }
       }
       try {
@@ -472,9 +486,6 @@ public class ImageProcessorController implements IPController {
       }
     }
   }
-
-
-
 
 
   private void exportPPM(Image image, String fileName, String fileType) {
@@ -507,7 +518,10 @@ public class ImageProcessorController implements IPController {
     }
   }
 
-
-
+  @Override
+  public void handleActionEvent(String cmd) {
+    this.in = new Scanner(cmd);
+    this.runIP();
+  }
 
 }

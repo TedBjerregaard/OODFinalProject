@@ -6,14 +6,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -25,16 +26,21 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-public class SwingFrame extends JFrame implements ActionListener, ItemListener,
-    ListSelectionListener {
+public class SwingFrame extends JFrame implements IPView, ActionListener, ItemListener {
   private JPanel mainPanel;
   private JScrollPane mainScrollPane;
   private JLabel fileOpenDisplay;
   private JLabel fileSaveDisplay;
   private JCheckBoxMenuItem layers;
+  private int numLayers;
+  private int currentLayer;
+  private final List<IViewListener> iViewListeners;
+
 
   public SwingFrame() {
     super();
+    this.iViewListeners = new ArrayList<>();
+
     setTitle("Image Processor");
     setSize(400, 400);
 
@@ -78,8 +84,22 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
     createLayerButton.addActionListener(this);
     createLayerPanel.add(createLayerButton);
 
+    this.numLayers = 0;
+    this.currentLayer = 0;
+
     //set current layer
-    JComboBox layers = new JComboBox();
+    JPanel currentLayerPanel = new JPanel();
+    createLayerPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(currentLayerPanel);
+    String layerOptions[] = {};
+    for( int i = 0; i < this.numLayers; i++) {
+      layerOptions[i] = String.valueOf(i);
+    }
+    JComboBox layers = new JComboBox(layerOptions);
+    //this.currentLayer = Integer.valueOf((Integer) layers.getSelectedItem());
+    layers.setActionCommand("create layer");
+    layers.addActionListener(this);
+    currentLayerPanel.add(layers);
 
     //Filter Transformations
     JPanel filterPanel = new JPanel();
@@ -132,6 +152,18 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
 
   }
 
+  public void registerViewEventListener(IViewListener listener){
+    this.iViewListeners.add( Objects.requireNonNull(listener));
+  }
+
+  public void emitActionEvent(String cmd) {
+    for ( IViewListener listener : this.iViewListeners ){
+      listener.handleActionEvent(cmd);
+    }
+  }
+
+
+
   /**
    * Invoked when an action occurs.
    *
@@ -140,19 +172,32 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
   @Override
   public void actionPerformed(ActionEvent e) {
 
+
     switch (e.getActionCommand()) {
 
       case "open file":
         final JFileChooser openChooser = new JFileChooser(".");
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-            "JPG & GIF Images", "jpg", "gif");
+            "JPG PNG PPM Images", "jpg", "pmm", "png");
         openChooser.setFileFilter(filter);
         int retvalue = openChooser.showOpenDialog(SwingFrame.this);
         if (retvalue == JFileChooser.APPROVE_OPTION) {
           File f = openChooser.getSelectedFile();
-          fileOpenDisplay.setText(f.getAbsolutePath());
+          f.getName();
+          String path = f.getAbsolutePath();
+          this.emitActionEvent("load " + path);
+          //emitLoadEvent(f.getAbsolutePath());
+
         }
         break;
+      case "create layer":
+        this.emitActionEvent("create ");
+        break;
+
+      case "current layer":
+        this.emitActionEvent("current " + this.currentLayer);
+
+
       case "save file":
         final JFileChooser saveChooser = new JFileChooser(".");
         int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
@@ -180,13 +225,15 @@ public class SwingFrame extends JFrame implements ActionListener, ItemListener,
 
   }
 
+
   /**
-   * Called whenever the value of the selection changes.
+   * Displays the given message to the user.
    *
-   * @param e the event that characterizes the change.
+   * @param message Message to be displayed.
+   * @throws IOException Thrown if output fails.
    */
   @Override
-  public void valueChanged(ListSelectionEvent e) {
+  public void renderMessage(String message) throws IOException {
 
   }
 }
