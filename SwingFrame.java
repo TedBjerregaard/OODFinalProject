@@ -6,11 +6,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -33,11 +36,13 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private JScrollPane mainScrollPane;
   private JLabel fileOpenDisplay;
   private JLabel fileSaveDisplay;
-  private JCheckBoxMenuItem layers;
+  private JLabel imageLabel;
+  private JPanel imagePanel;
+  private BufferedImage topVisibleLayer;
+  private Boolean imgImported = false;
   private int numLayers;
   private int currentLayer;
   private final List<IViewListener> iViewListeners;
-  private final String layerOptions[];
 
   public SwingFrame() {
     super();
@@ -46,7 +51,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     setTitle("Image Processor");
     setSize(400, 400);
 
-    layerOptions = new String[this.numLayers];
     mainPanel = new JPanel();
     //for elements to be arranged vertically within this panel
     mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
@@ -89,6 +93,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     this.numLayers = 1;
     this.currentLayer = 0;
+
+
 
     //set current layer
     JPanel currentLayerPanel = new JPanel();
@@ -145,32 +151,33 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
 
     //show an image with a scrollbar
-    JPanel imagePanel = new JPanel();
+    this.imagePanel = new JPanel();
     //a border around the panel with a caption
     imagePanel.setBorder(BorderFactory.createTitledBorder("Showing an image"));
     imagePanel.setLayout(new GridLayout(1, 0, 10, 10));
-/*
-
-    BufferedImage image = ImageIO.read(new File(String.valueOf(this.fileOpenDisplay)));
-    JLabel label = new JLabel(new ImageIcon(image));
-    imagePanel.add(label);
-*/
-
-    //imagePanel.setMaximumSize(null);
+    imagePanel.setVisible(true);
     mainPanel.add(imagePanel);
 
-    String image = "Penguins.jpg";
-    JLabel imageLabel;
-    imageLabel = new JLabel();
-    imageLabel.setIcon(new ImageIcon(image));
+
 
 
   }
-
-
+  public void showImageHelp() {
+    if (this.numLayers > 0 && this.imgImported) {
+      this.imageLabel = new JLabel();
+      ImageIcon topmostVisibleImg = new ImageIcon(this.topVisibleLayer);
+      this.imageLabel.setIcon(topmostVisibleImg);
+      this.imagePanel.add(this.imageLabel);
+    }
+  }
 
   public void registerViewEventListener(IViewListener listener){
     this.iViewListeners.add( Objects.requireNonNull(listener));
+  }
+
+  @Override
+  public void updateTopVisibleLayer(BufferedImage buff) {
+    this.topVisibleLayer = buff;
   }
 
   public void emitActionEvent(String cmd) {
@@ -203,6 +210,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
           f.getName();
           String path = f.getAbsolutePath();
           this.emitActionEvent("load " + path);
+          this.imgImported = true;
+          this.showImageHelp();
           //emitLoadEvent(f.getAbsolutePath());
 
         }

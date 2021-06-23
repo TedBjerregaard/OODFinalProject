@@ -4,12 +4,11 @@ package model;
  * A class that represents one method of representing a sequence of pixels, an model.Image, and its
  * corresponding data. Each pixel has a corresponding color that is representing using 3 channels:
  * red, green, and blue. Each of these channels are stored using 8-bits, and thus have 256 distinct
- * possible values.
- * Height: Refers to the size of the picture vertically in pixels. Width: Refers to the size of the
- * model.Image horizontally in pixels. maxColorVal: The maximum integer value for each channel of every
- * pixel in the model.Image. minColorVal: The minimum integer value for each channel of every pixel in the
- * model.Image. pixelArray: A 2D array of pixels representing each pixel in the model.Image and its location in
- * the image.
+ * possible values. Height: Refers to the size of the picture vertically in pixels. Width: Refers to
+ * the size of the model.Image horizontally in pixels. maxColorVal: The maximum integer value for
+ * each channel of every pixel in the model.Image. minColorVal: The minimum integer value for each
+ * channel of every pixel in the model.Image. pixelArray: A 2D array of pixels representing each
+ * pixel in the model.Image and its location in the image.
  */
 public class Image {
 
@@ -20,12 +19,13 @@ public class Image {
   public Pixel[][] pixelArray;
 
   /**
-   * Constructor for the model.Image Class. Minimum color value for a channel in a pixel is automatically
-   * set to 0.
+   * Constructor for the model.Image Class. Minimum color value for a channel in a pixel is
+   * automatically set to 0.
    *
    * @param height      Size of the image vertically in pixels.
    * @param width       Size of the image vertically in pixels.
-   * @param maxColorVal The maximum integer value for each channel of every pixel in the model.Image.
+   * @param maxColorVal The maximum integer value for each channel of every pixel in the
+   *                    model.Image.
    * @param pixelArray  2D array of pixels that create the image.
    */
   public Image(int height, int width, int maxColorVal, Pixel[][] pixelArray) {
@@ -60,10 +60,10 @@ public class Image {
   }
 
   /**
-   * Applies an odd-sized model.Kernel to each pixel in an image to produce a final filtered image. The
-   * model.Kernel is applied to each pixel and is used to compute the final color values for that given
-   * pixel by multiplying the valid, that is existent, pixel color values with the corresponding
-   * model.Kernel values given a particular pixel.
+   * Applies an odd-sized model.Kernel to each pixel in an image to produce a final filtered image.
+   * The model.Kernel is applied to each pixel and is used to compute the final color values for
+   * that given pixel by multiplying the valid, that is existent, pixel color values with the
+   * corresponding model.Kernel values given a particular pixel.
    *
    * @param kernel An odd-sized matrix of values that will be applied to each pixel to filter an
    *               image.

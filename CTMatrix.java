@@ -8,7 +8,7 @@ import java.util.List;
  * multiplication to the current red, green, and blue values in order to find the final,
  * color-transformed red, green, blue values for the final model.Image.
  */
-public class CTMatrix {
+public class CTMatrix implements ICTMatrix {
 
   private final List<Double> red;
   private final List<Double> green;
@@ -36,29 +36,17 @@ public class CTMatrix {
     this.blue = blue;
   }
 
-  /**
-   * Returns the matrix of values corresponding to the red part of the color transformation.
-   *
-   * @return Returns the red matrix of values.
-   */
+
   public List<Double> getRedMatrix() {
     return this.red;
   }
 
-  /**
-   * Returns the matrix of values corresponding to the green part of color transformation.
-   *
-   * @return Returns the green matrix of values
-   */
+
   public List<Double> getGreenMatrix() {
     return this.green;
   }
 
-  /**
-   * Returns the matrix of values corresponding to the blue part of color transformation.
-   *
-   * @return Returns the blue matrix of values
-   */
+
   public List<Double> getBlueMatrix() {
     return this.blue;
   }

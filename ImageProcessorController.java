@@ -125,6 +125,8 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           try {
             this.importImage(fileName);
+            renderMessageHelp(view, "Top visible Layer: " +
+                this.model.getTopVisibleLayer().getName() + "\n");
           } catch (IllegalArgumentException e) {
             renderMessageHelp(view, "Image Wrong Size\n");
             break;
@@ -132,6 +134,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           renderMessageHelp(view, fileName + " loaded to layer: "
               + this.model.getCurrentLayerIndex() + "\n");
+          this.updateTopmostVisible();
           break;
 
         case "export":
@@ -144,6 +147,8 @@ public class ImageProcessorController implements IPController, IViewListener {
           String fileNameImport = in.next();
           this.importMultiLayeredImage(fileNameImport);
           renderMessageHelp(view, fileNameImport + " Imported" + "\n");
+          this.updateTopmostVisible();
+
           break;
 
         case "save":
@@ -153,6 +158,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           IImageLayer topVisible = this.model.getTopVisibleLayer();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
           renderMessageHelp(view, fileNameSave + " Saved" + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -160,6 +166,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           int layerIndex = in.nextInt();
           this.model.copyCurrentLayer(layerIndex);
           renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -167,18 +174,23 @@ public class ImageProcessorController implements IPController, IViewListener {
           int layerIndexRemove = in.nextInt();
           this.model.removeLayer(layerIndexRemove);
           renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
+          this.updateTopmostVisible();
+
           break;
 
         case "visible":
           this.model.makeInvisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " is now Visible" + "\n");
+          this.updateTopmostVisible();
+
           break;
 
         case "invisible":
           this.model.makeVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex()
               + " is now Invisible" + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -186,6 +198,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.applySepia();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sepia applied" + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -193,6 +206,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.applyGreyscale();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Greyscale applied" + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -200,6 +214,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.blur();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
               + "\n");
+          this.updateTopmostVisible();
 
           break;
 
@@ -207,6 +222,8 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.sharpen();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sharpen applied" + "\n");
+          this.updateTopmostVisible();
+
           break;
 
         case "createImage":
@@ -422,7 +439,7 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
 
-  private void renderMessageHelp(ImageProcessorView view, String string) {
+  private void renderMessageHelp(IPView view, String string) {
     try {
       view.renderMessage(string);
     } catch (IOException io) {
@@ -522,6 +539,39 @@ public class ImageProcessorController implements IPController, IViewListener {
   public void handleActionEvent(String cmd) {
     this.in = new Scanner(cmd);
     this.runIP();
+  }
+
+  public void updateTopmostVisible() {
+    String layerPath = this.model.getTopVisibleLayer().getName();
+    try {
+      BufferedImage buffImage = ImageIO.read(new File(layerPath));
+      this.view.updateTopVisibleLayer(buffImage);
+      renderMessageHelp(view, "file pushed to frame" + "\n");
+
+    }
+    catch (IOException io) {
+      new IllegalArgumentException(io.getMessage());
+    }
+/*
+    IImageLayer layer = this.model.getTopVisibleLayer();
+    Image img = layer.getImage();
+
+    BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(),
+        TYPE_INT_RGB);
+    for (int row = 0; row < buff.getHeight(); row++) {
+      for (int col = 0; col < buff.getWidth(); col++) {
+        Pixel currentPix = img.getPixel(row, col);
+        PixelColor pixColor = currentPix.getColor();
+        Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
+            pixColor.getBlue());
+        int colorInt = currentColor.getRGB();
+        buff.setRGB(col, row, colorInt);
+      }
+    }
+
+    this.view.updateTopVisibleLayer(buff);*/
+
+
   }
 
 }

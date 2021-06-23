@@ -4,14 +4,15 @@ import java.util.List;
 
 /**
  * A class representing a matrix of values that will be applied to each given pixel in an image to
- * achieve some kind of filtering effect. This is done by applying the center of the model.Kernel matrix
- * of values to a pixel and multiplying the value of the kernel with the color values of the pixels
- * that correspond to it (i.e. overlap kernel and pixel of interest in image to do math, and thus
- * apply a filter). The size of the model.Kernel, in this case, must be odd to ensure there is a center
- * point for the model.Kernel. When applying the model.Kernel, if there are no corresponding pixels in the image
- * (i.e. on the edges of the image) then those model.Kernel values are ignored.
+ * achieve some kind of filtering effect. This is done by applying the center of the model.Kernel
+ * matrix of values to a pixel and multiplying the value of the kernel with the color values of the
+ * pixels that correspond to it (i.e. overlap kernel and pixel of interest in image to do math, and
+ * thus apply a filter). The size of the model.Kernel, in this case, must be odd to ensure there is
+ * a center point for the model.Kernel. When applying the model.Kernel, if there are no
+ * corresponding pixels in the image (i.e. on the edges of the image) then those model.Kernel values
+ * are ignored.
  */
-public class Kernel {
+public class Kernel implements IKernel {
 
   private final int size;
   private final double[][] valuesArray;
@@ -55,36 +56,15 @@ public class Kernel {
     }
   }
 
-  /**
-   * Getter for the size of the model.Kernel.
-   *
-   * @return Size of this model.Kernel.
-   */
   public int getSize() {
     return this.size;
   }
 
-  /**
-   * Returns the value associated with a given row and column in the model.Kernel.
-   *
-   * @param row "Y" position of this value.
-   * @param col "X" position of this value.
-   * @return The value at the given row and column position in this model.Kernel.
-   */
   public double getValue(int row, int col) {
     return valuesArray[row][col];
   }
 
-  /**
-   * Gets the value that should be multiplied to each channel of a pixel.
-   *
-   * @param row         Row where the k value is located.
-   * @param col         Column where the k value is located.
-   * @param kernelValue Value the color should be multiplied by.
-   * @return K value.
-   */
   public int getK(int row, int col, int kernelValue) {
     return kArray[row][col][kernelValue];
   }
-
 }

@@ -2,7 +2,7 @@ package model;
 
 /**
  * A representation of a pixel in an image. A pixel has an x and y value to describe its location in
- * an image. The model.PixelColor corresponds to the red, green, and blue values for a given pixel.
+ * an image. The PixelColor corresponds to the red, green, and blue values for a given pixel.
  */
 public class Pixel {
 
@@ -11,10 +11,10 @@ public class Pixel {
   private final PixelColor color;
 
   /**
-   * Constructor for the model.Pixel class.
+   * Constructor for the Pixel class.
    *
-   * @param x     X position of this model.Pixel.
-   * @param y     Y position of this model.Pixel.
+   * @param x     X position of this Pixel.
+   * @param y     Y position of this Pixel.
    * @param color Color of this pixel (r,g,b).
    */
   public Pixel(int x, int y, PixelColor color) {
@@ -25,11 +25,11 @@ public class Pixel {
 
   /**
    * Applies a given color transformation matrix to a pixel to obtain it's new red, green, and blue
-   * values for its model.PixelColor.
+   * values for its PixelColor.
    *
    * @param matrix Color Transformation matrix used to find new red, green, and blue values for this
-   *               model.Pixel.
-   * @return The new color of this model.Pixel
+   *               Pixel.
+   * @return The new color of this Pixel
    */
   public PixelColor getTransformedColor(CTMatrix matrix) {
     int newRed = this.color.getTransformed(matrix.getRedMatrix());
@@ -39,7 +39,7 @@ public class Pixel {
   }
 
   /**
-   * Gets the x-value of this model.Pixel.
+   * Gets the x-value of this Pixel.
    *
    * @return Int representing the X-value.
    */
@@ -48,7 +48,7 @@ public class Pixel {
   }
 
   /**
-   * Gets the y-value of this model.Pixel.
+   * Gets the y-value of this Pixel.
    *
    * @return Int representing the Y-value.
    */
@@ -59,7 +59,7 @@ public class Pixel {
   /**
    * Getter for the color of this model.Pixel.
    *
-   * @return model.PixelColor with the red, green, and blue values for the color of this model.Pixel.
+   * @return      PixelColor with the red, green, and blue values for the color of this Pixel.
    */
   public PixelColor getColor() {
     return this.color;

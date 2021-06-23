@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -18,4 +19,5 @@ public interface IPView {
 
   void registerViewEventListener(IViewListener listener);
 
+  void updateTopVisibleLayer(BufferedImage buff);
 }

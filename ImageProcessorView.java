@@ -1,6 +1,7 @@
 
 package view;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -33,6 +34,11 @@ public class ImageProcessorView implements IPView {
 
   @Override
   public void registerViewEventListener(IViewListener listener) {
+
+  }
+
+  @Override
+  public void updateTopVisibleLayer(BufferedImage buff) {
 
   }
 
