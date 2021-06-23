@@ -18,10 +18,12 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -35,7 +37,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private int numLayers;
   private int currentLayer;
   private final List<IViewListener> iViewListeners;
-
+  private final String layerOptions[];
 
   public SwingFrame() {
     super();
@@ -44,6 +46,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     setTitle("Image Processor");
     setSize(400, 400);
 
+    layerOptions = new String[this.numLayers];
     mainPanel = new JPanel();
     //for elements to be arranged vertically within this panel
     mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
@@ -84,22 +87,34 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     createLayerButton.addActionListener(this);
     createLayerPanel.add(createLayerButton);
 
-    this.numLayers = 0;
+    this.numLayers = 1;
     this.currentLayer = 0;
 
     //set current layer
     JPanel currentLayerPanel = new JPanel();
     createLayerPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(currentLayerPanel);
-    String layerOptions[] = {};
-    for( int i = 0; i < this.numLayers; i++) {
-      layerOptions[i] = String.valueOf(i);
+
+
+    JTextField textField = new JFormattedTextField();
+    try {
+      String text = textField.getText();
+      if (text.length()>0) {
+        int i = Integer.valueOf(text);
+        this.currentLayer = i;
+      }
+
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
     }
-    JComboBox layers = new JComboBox(layerOptions);
+    currentLayerPanel.add(textField);
+    /*addEmptyLayer();
+
+    JComboBox layers = new JComboBox(this.layerOptions);
     //this.currentLayer = Integer.valueOf((Integer) layers.getSelectedItem());
     layers.setActionCommand("create layer");
     layers.addActionListener(this);
-    currentLayerPanel.add(layers);
+    currentLayerPanel.add(layers);*/
 
     //Filter Transformations
     JPanel filterPanel = new JPanel();
@@ -152,6 +167,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
   }
 
+
+
   public void registerViewEventListener(IViewListener listener){
     this.iViewListeners.add( Objects.requireNonNull(listener));
   }
@@ -192,6 +209,12 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         break;
       case "create layer":
         this.emitActionEvent("create ");
+        this.numLayers ++;
+        try {
+          this.renderMessage("layer created");
+        } catch (IOException exception) {
+          exception.printStackTrace();
+        }
         break;
 
       case "current layer":
