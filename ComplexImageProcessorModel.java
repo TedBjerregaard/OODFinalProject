@@ -1,9 +1,20 @@
 package model;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * An implementation of the model for an image processor that allows support for creating,
@@ -181,9 +192,11 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
 
   @Override
   public void removeLayer(int index) {
-    this.layers.remove(index);
-    if (index == this.currentLayer) {
-      this.currentLayer = this.currentLayer - 1;
+    if(index < this.getNumLayers() && index >= 0) {
+      this.layers.remove(index);
+      if (index == this.currentLayer) {
+        this.currentLayer = this.currentLayer - 1;
+      }
     }
   }
 
@@ -240,11 +253,6 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
     return this.layers.size();
   }
 
-
-  private IImageLayer updateTopmostLayer() {
-    IImageLayer topVisible = this.getTopVisibleLayer();
-    return topVisible;
-  }
 
 
 }

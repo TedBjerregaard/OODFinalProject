@@ -12,23 +12,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class SwingFrame extends JFrame implements IPView, ActionListener, ItemListener {
@@ -43,6 +36,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private int numLayers;
   private int currentLayer;
   private final List<IViewListener> iViewListeners;
+  private JTextField currentTextField;
+  private JTextField removeTextField;
+  private JTextField copyTextField;
 
   public SwingFrame() {
     super();
@@ -50,6 +46,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     setTitle("Image Processor");
     setSize(400, 400);
+
 
     mainPanel = new JPanel();
     //for elements to be arranged vertically within this panel
@@ -94,28 +91,58 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     this.numLayers = 1;
     this.currentLayer = 0;
 
-
-
     //set current layer
     JPanel currentLayerPanel = new JPanel();
     createLayerPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(currentLayerPanel);
 
+    JLabel currentLabel = new JLabel("Set current to layer #: ");
+    currentTextField = new JTextField(5);
+    currentLabel.setLabelFor(currentTextField);
+    currentLayerPanel.add(currentLabel);
+    currentLayerPanel.add(currentTextField);
 
-    JTextField textField = new JFormattedTextField();
-    try {
-      String text = textField.getText();
-      if (text.length()>0) {
-        int i = Integer.valueOf(text);
-        this.currentLayer = i;
-      }
+    JButton setCurrent = new JButton("set");
+    setCurrent.setActionCommand("current");
+    setCurrent.addActionListener(this);
+    currentLayerPanel.add(setCurrent);
 
-    } catch (NumberFormatException e) {
-      e.printStackTrace();
-    }
-    currentLayerPanel.add(textField);
+    //copy panel
+    JPanel copyPanel = new JPanel();
+    copyPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(copyPanel);
+
+    JLabel copyLabel = new JLabel("Copy current layer to layer #: ");
+    copyTextField = new JTextField(5);
+    copyLabel.setLabelFor(copyTextField);
+    copyPanel.add(copyLabel);
+    copyPanel.add(copyTextField);
+
+    JButton copy = new JButton("copy");
+    copy.setActionCommand("copy");
+    copy.addActionListener(this);
+    copyPanel.add(copy);
+
+
+    //remove panel
+    JPanel removeLayerPanel = new JPanel();
+    currentLayerPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(removeLayerPanel);
+    JLabel removeLabel = new JLabel("remove layer #: ");
+    removeTextField = new JTextField(5);
+    removeLabel.setLabelFor(removeTextField);
+    removeLayerPanel.add(removeLabel);
+    removeLayerPanel.add(removeTextField);
+
+    JButton remove = new JButton("remove");
+    remove.setActionCommand("remove");
+    remove.addActionListener(this);
+    removeLayerPanel.add(remove);
+
+
+
+
     /*addEmptyLayer();
-
     JComboBox layers = new JComboBox(this.layerOptions);
     //this.currentLayer = Integer.valueOf((Integer) layers.getSelectedItem());
     layers.setActionCommand("create layer");
@@ -150,6 +177,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     mainPanel.add(filterPanel);
 
 
+
+
     //show an image with a scrollbar
     this.imagePanel = new JPanel();
     //a border around the panel with a caption
@@ -158,10 +187,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     imagePanel.setVisible(true);
     mainPanel.add(imagePanel);
 
-
-
-
   }
+
   public void showImageHelp() {
     if (this.numLayers > 0 && this.imgImported) {
       this.imageLabel = new JLabel();
@@ -179,6 +206,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   public void updateTopVisibleLayer(BufferedImage buff) {
     this.topVisibleLayer = buff;
   }
+
 
   public void emitActionEvent(String cmd) {
     for ( IViewListener listener : this.iViewListeners ){
@@ -226,9 +254,46 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         }
         break;
 
-      case "current layer":
-        this.emitActionEvent("current " + this.currentLayer);
+      case "current":
+        try {
+          String text = currentTextField.getText();
+          if (text.length() > 0) {
+            this.currentLayer = Integer.parseInt(text);
+            this.emitActionEvent("current " + this.currentLayer);
+            this.currentTextField.setText("");
+          }
 
+        } catch (NumberFormatException ex) {
+          ex.printStackTrace();
+        }
+
+        break;
+
+      case "remove":
+        try {
+          String text = removeTextField.getText();
+          if (text.length() > 0) {
+            int toRemove = Integer.parseInt(text);
+            this.emitActionEvent("remove " + toRemove);
+            this.removeTextField.setText("");
+          }
+        } catch (NumberFormatException ex) {
+          ex.printStackTrace();
+        }
+        break;
+
+      case "copy":
+        try {
+          String text = copyTextField.getText();
+          if (text.length() > 0) {
+            int toCopy = Integer.parseInt(text);
+            this.emitActionEvent("copy " + toCopy);
+            this.copyTextField.setText("");
+          }
+        } catch (NumberFormatException ex) {
+          ex.printStackTrace();
+        }
+        break;
 
       case "save file":
         final JFileChooser saveChooser = new JFileChooser(".");
@@ -238,11 +303,22 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
           fileSaveDisplay.setText(f.getAbsolutePath());
         }
         break;
-      case "sharpen":
-      case "blur":
-      case "sepia":
-      case "greyscale":
 
+      case "sharpen":
+        this.emitActionEvent("sharpen");
+        break;
+
+      case "blur":
+        this.emitActionEvent("blur");
+        break;
+
+      case "sepia":
+        this.emitActionEvent("sepia");
+        break;
+
+      case "greyscale":
+        this.emitActionEvent("greyscale");
+        break;
     }
   }
 

@@ -98,7 +98,6 @@ public class ImageProcessorController implements IPController, IViewListener {
           int index = this.model.getNumLayers();
          /* if (index > this.model.getNumLayers() || index < 0) {
             renderMessageHelp(view, "invalid layer index\n");
-
             break;
           }*/
           this.model.createLayer(index);
@@ -110,8 +109,9 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "current":
           int currentIndex = in.nextInt();
-          if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
-            renderMessageHelp(view, "invalid layer index\n");
+          if (currentIndex >= this.model.getNumLayers() || currentIndex < 0 ||
+              this.model.getNumLayers() == 0) {
+            renderMessageHelp(view, "invalid layer index to set to current\n");
             break;
           }
           this.model.setCurrentLayer(currentIndex);
@@ -157,21 +157,35 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           IImageLayer topVisible = this.model.getTopVisibleLayer();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
-          renderMessageHelp(view, fileNameSave + " Saved" + "\n");
+          renderMessageHelp(this.view, fileNameSave + " Saved" + "\n");
           this.updateTopmostVisible();
 
           break;
 
         case "copy":
           int layerIndex = in.nextInt();
+
+          IImageLayer copyTo = this.model.getLayerAt(layerIndex);
+
+          if(!copyTo.isEmptyLayer()) {
+            renderMessageHelp(view, "layer attempting to copy to is not empty");
+            break;
+          }
+
           this.model.copyCurrentLayer(layerIndex);
           renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
           this.updateTopmostVisible();
-
           break;
 
         case "remove":
           int layerIndexRemove = in.nextInt();
+
+          if (layerIndexRemove >= this.model.getNumLayers() || layerIndexRemove < 0 ||
+              this.model.getNumLayers() == 0) {
+            renderMessageHelp(view, "invalid layer index to remove\n");
+            break;
+          }
+
           this.model.removeLayer(layerIndexRemove);
           renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
           this.updateTopmostVisible();
@@ -542,6 +556,12 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
   public void updateTopmostVisible() {
+
+    if (this.model.getNumLayers() == 0) {
+      this.view.updateTopVisibleLayer(null);
+      return;
+    }
+
     String layerPath = this.model.getTopVisibleLayer().getName();
     try {
       BufferedImage buffImage = ImageIO.read(new File(layerPath));
@@ -550,12 +570,11 @@ public class ImageProcessorController implements IPController, IViewListener {
 
     }
     catch (IOException io) {
-      new IllegalArgumentException(io.getMessage());
+      throw new IllegalArgumentException(io.getMessage()); //TODO: fix to render a message to viewer
     }
 /*
     IImageLayer layer = this.model.getTopVisibleLayer();
     Image img = layer.getImage();
-
     BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(),
         TYPE_INT_RGB);
     for (int row = 0; row < buff.getHeight(); row++) {
@@ -568,7 +587,6 @@ public class ImageProcessorController implements IPController, IViewListener {
         buff.setRGB(col, row, colorInt);
       }
     }
-
     this.view.updateTopVisibleLayer(buff);*/
 
 

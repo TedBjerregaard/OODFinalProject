@@ -102,4 +102,6 @@ public interface IImageLayer {
    * @return Width of the image.
    */
   int getImageWidth();
+
+  boolean isEmptyLayer();
 }
