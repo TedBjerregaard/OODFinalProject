@@ -149,6 +149,30 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     removeLayerPanel.add(remove);
 
 
+    //current layer visibility
+    JPanel visibilityPanel = new JPanel();
+    visibilityPanel.setBorder(BorderFactory.createTitledBorder("Current Layer Visibility"));
+    visibilityPanel.setLayout(new BoxLayout(visibilityPanel, BoxLayout.PAGE_AXIS));
+    mainPanel.add(visibilityPanel);
+
+    JPanel changeVisibilityPanel = new JPanel();
+    changeVisibilityPanel.setLayout(new FlowLayout());
+    visibilityPanel.add(changeVisibilityPanel);
+    JLabel visibility = new JLabel("set visibility of current layer: ");
+    changeVisibilityPanel.add(visibility);
+
+    //visible button
+    JButton visible = new JButton("visible");
+    visible.setActionCommand("visible");
+    visible.addActionListener(this);
+    changeVisibilityPanel.add(visible);
+
+    //invisible button
+    JButton invisible = new JButton("invisible");
+    invisible.setActionCommand("invisible");
+    invisible.addActionListener(this);
+    changeVisibilityPanel.add(invisible);
+
     //Filter Transformations
     JPanel filterPanel = new JPanel();
     filterPanel.setBorder(BorderFactory.createTitledBorder("Filter"));
@@ -206,6 +230,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   @Override
   public void updateTopVisibleLayer(BufferedImage buff) {
     this.topVisibleLayer = buff;
+    this.showImageHelp();
   }
 
   public void emitActionEvent(String cmd) {
@@ -230,7 +255,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
       case "open file":
         final JFileChooser openChooser = new JFileChooser(".");
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-            "JPG PNG PPM Images", "jpg", "pmm", "png","jpeg");
+            "JPG PNG PPM Images", "jpg", "ppm", "png","jpeg");
         openChooser.setFileFilter(filter);
         int retvalue = openChooser.showOpenDialog(SwingFrame.this);
         if (retvalue == JFileChooser.APPROVE_OPTION) {
@@ -293,13 +318,19 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         }
         break;
 
+      case "visible":
+        this.emitActionEvent("visible");
+        break;
 
+      case "invisible":
+        this.emitActionEvent("invisible");
+        break;
       case "save file":
         final JFileChooser saveChooser = new JFileChooser(".");
         int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
         if (chooserRetvalue == JFileChooser.APPROVE_OPTION) {
           File f = saveChooser.getSelectedFile();
-          fileSaveDisplay.setText(f.getAbsolutePath());
+          this.emitActionEvent("save " + f.getAbsolutePath());
         }
         break;
       case "sharpen":

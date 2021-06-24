@@ -154,9 +154,10 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "save":
           String fileNameSave = in.next();
-          String fileTypeSave = in.next();
+
 
           IImageLayer topVisible = this.model.getTopVisibleLayer();
+          String fileTypeSave = topVisible.getFileType();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
           renderMessageHelp(view, fileNameSave + " Saved" + "\n");
           this.updateTopmostVisible();
@@ -209,14 +210,18 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "sepia":
           this.model.applySepia();
+          BufferedImage buff = getBuff(this.model.getCurrentImage());
+          this.view.updateTopVisibleLayer(buff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sepia applied" + "\n");
-          this.updateTopmostVisible();
+          //this.updateTopmostVisible();
 
           break;
 
         case "greyscale":
           this.model.applyGreyscale();
+          BufferedImage greyBuff = getBuff(this.model.getCurrentImage());
+          this.view.updateTopVisibleLayer(greyBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Greyscale applied" + "\n");
           this.updateTopmostVisible();
@@ -225,14 +230,19 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "blur":
           this.model.blur();
+          BufferedImage blurBuff = getBuff(this.model.getCurrentImage());
+          this.view.updateTopVisibleLayer(blurBuff);
+          this.updateTopmostVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
               + "\n");
-          this.updateTopmostVisible();
+
 
           break;
 
         case "sharpen":
           this.model.sharpen();
+          BufferedImage sharpBuff = getBuff(this.model.getCurrentImage());
+          this.view.updateTopVisibleLayer(sharpBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sharpen applied" + "\n");
           this.updateTopmostVisible();
@@ -554,6 +564,30 @@ public class ImageProcessorController implements IPController, IViewListener {
     this.runIP();
   }
 
+  public BufferedImage getBuff(Image img) {
+    BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(),
+        TYPE_INT_RGB);
+    for (int row = 0; row < buff.getHeight(); row++) {
+      for (int col = 0; col < buff.getWidth(); col++) {
+        Pixel currentPix = img.getPixel(row, col);
+        PixelColor pixColor = currentPix.getColor();
+        Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
+            pixColor.getBlue());
+        int colorInt = currentColor.getRGB();
+        buff.setRGB(col, row, colorInt);
+
+      }
+    }
+    return buff;
+
+   /* if (filetype.equals("ppm")) {
+
+    }
+    else {
+
+    }*/
+  }
+
   public void updateTopmostVisible() {
     if (this.model.getNumLayers() == 0) {
       this.view.updateTopVisibleLayer(null);
@@ -563,7 +597,6 @@ public class ImageProcessorController implements IPController, IViewListener {
     String layerPath = this.model.getTopVisibleLayer().getName();
     //ppm case
     if (this.model.getTopVisibleLayer().getFileType().equals("ppm")) {
-      File file = new File(layerPath);
       Image imgFrom = this.model.getTopVisibleLayer().getImage();
       BufferedImage buff = new BufferedImage(imgFrom.getWidth(),imgFrom.getHeight(),
           TYPE_INT_RGB);
