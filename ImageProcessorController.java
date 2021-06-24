@@ -127,6 +127,7 @@ public class ImageProcessorController implements IPController, IViewListener {
             this.importImage(fileName);
             renderMessageHelp(view, "Top visible Layer: " +
                 this.model.getTopVisibleLayer().getName() + "\n");
+            this.updateTopmostVisible();
           } catch (IllegalArgumentException e) {
             renderMessageHelp(view, "Image Wrong Size\n");
             break;
@@ -134,7 +135,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           renderMessageHelp(view, fileName + " loaded to layer: "
               + this.model.getCurrentLayerIndex() + "\n");
-          this.updateTopmostVisible();
+
           break;
 
         case "export":
