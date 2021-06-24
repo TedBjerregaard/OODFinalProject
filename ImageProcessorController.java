@@ -127,7 +127,8 @@ public class ImageProcessorController implements IPController, IViewListener {
             this.importImage(fileName);
             renderMessageHelp(view, "Top visible Layer: " +
                 this.model.getTopVisibleLayer().getName() + "\n");
-            this.updateTopmostVisible();
+            BufferedImage SBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+            this.view.updateTopVisibleLayer(SBuff);
           } catch (IllegalArgumentException e) {
             renderMessageHelp(view, "Image Wrong Size\n");
             break;
@@ -160,7 +161,6 @@ public class ImageProcessorController implements IPController, IViewListener {
           String fileTypeSave = topVisible.getFileType();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
           renderMessageHelp(view, fileNameSave + " Saved" + "\n");
-          this.updateTopmostVisible();
 
           break;
 
@@ -175,8 +175,8 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           this.model.copyCurrentLayer(layerIndex);
           renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
-          this.updateTopmostVisible();
-
+          BufferedImage CBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          this.view.updateTopVisibleLayer(CBuff);
           break;
 
         case "remove":
@@ -188,29 +188,32 @@ public class ImageProcessorController implements IPController, IViewListener {
           }
           this.model.removeLayer(layerIndexRemove);
           renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
-          this.updateTopmostVisible();
+          BufferedImage RBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          this.view.updateTopVisibleLayer(RBuff);
 
           break;
 
         case "visible":
-          this.model.makeInvisible();
+          this.model.makeVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " is now Visible" + "\n");
-          this.updateTopmostVisible();
+          BufferedImage VBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          this.view.updateTopVisibleLayer(VBuff);
 
           break;
 
         case "invisible":
-          this.model.makeVisible();
+          this.model.makeInvisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex()
               + " is now Invisible" + "\n");
-          this.updateTopmostVisible();
+          BufferedImage IBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          this.view.updateTopVisibleLayer(IBuff);
 
           break;
 
         case "sepia":
           this.model.applySepia();
-          BufferedImage buff = getBuff(this.model.getCurrentImage());
+          BufferedImage buff = getBuff(this.model.getTopVisibleLayer().getImage());
           this.view.updateTopVisibleLayer(buff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sepia applied" + "\n");
@@ -220,19 +223,19 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "greyscale":
           this.model.applyGreyscale();
-          BufferedImage greyBuff = getBuff(this.model.getCurrentImage());
+          BufferedImage greyBuff = getBuff(this.model.getTopVisibleLayer().getImage());
           this.view.updateTopVisibleLayer(greyBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Greyscale applied" + "\n");
-          this.updateTopmostVisible();
+          //this.updateTopmostVisible();
 
           break;
 
         case "blur":
           this.model.blur();
-          BufferedImage blurBuff = getBuff(this.model.getCurrentImage());
+          BufferedImage blurBuff = getBuff(this.model.getTopVisibleLayer().getImage());
           this.view.updateTopVisibleLayer(blurBuff);
-          this.updateTopmostVisible();
+          //this.updateTopmostVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
               + "\n");
 
@@ -241,11 +244,11 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "sharpen":
           this.model.sharpen();
-          BufferedImage sharpBuff = getBuff(this.model.getCurrentImage());
+          BufferedImage sharpBuff = getBuff(this.model.getTopVisibleLayer().getImage());
           this.view.updateTopVisibleLayer(sharpBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sharpen applied" + "\n");
-          this.updateTopmostVisible();
+          //this.updateTopmostVisible();
 
           break;
 

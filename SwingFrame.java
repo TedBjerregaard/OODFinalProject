@@ -327,6 +327,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         break;
       case "save file":
         final JFileChooser saveChooser = new JFileChooser(".");
+        FileNameExtensionFilter saveFilter = new FileNameExtensionFilter(
+            "JPG PNG PPM Images", "jpg", "ppm", "png","jpeg");
+        saveChooser.setFileFilter(saveFilter);
         int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
         if (chooserRetvalue == JFileChooser.APPROVE_OPTION) {
           File f = saveChooser.getSelectedFile();
