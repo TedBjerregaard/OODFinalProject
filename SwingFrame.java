@@ -38,6 +38,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private JLabel fileSaveDisplay;
   private JLabel imageLabel;
   private JPanel imagePanel;
+  private ImageIcon topmostVisibleImg;
   private BufferedImage topVisibleLayer;
   private Boolean imgImported = false;
   private int numLayers;
@@ -183,6 +184,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     imagePanel.setLayout(new FlowLayout());
     imagePanel.setVisible(true);
     mainPanel.add(imagePanel);
+    this.imageLabel = new JLabel();
 
 
 
@@ -190,9 +192,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   }
   public void showImageHelp() {
     if (this.numLayers > 0 && this.imgImported) {
-      this.imageLabel = new JLabel();
-      ImageIcon topmostVisibleImg = new ImageIcon(this.topVisibleLayer);
-      this.imageLabel.setIcon(topmostVisibleImg);
+      this.imagePanel.remove(this.imageLabel);
+      this.topmostVisibleImg = new ImageIcon(this.topVisibleLayer);
+      this.imageLabel.setIcon(this.topmostVisibleImg);
       this.imagePanel.add(this.imageLabel);
     }
   }
