@@ -12,16 +12,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class SwingFrame extends JFrame implements IPView, ActionListener, ItemListener {
@@ -46,7 +53,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     setTitle("Image Processor");
     setSize(400, 400);
-
 
     mainPanel = new JPanel();
     //for elements to be arranged vertically within this panel
@@ -91,11 +97,12 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     this.numLayers = 1;
     this.currentLayer = 0;
 
+
+
     //set current layer
     JPanel currentLayerPanel = new JPanel();
     createLayerPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(currentLayerPanel);
-
     JLabel currentLabel = new JLabel("Set current to layer #: ");
     currentTextField = new JTextField(5);
     currentLabel.setLabelFor(currentTextField);
@@ -106,6 +113,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     setCurrent.setActionCommand("current");
     setCurrent.addActionListener(this);
     currentLayerPanel.add(setCurrent);
+
 
     //copy panel
     JPanel copyPanel = new JPanel();
@@ -140,15 +148,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     removeLayerPanel.add(remove);
 
 
-
-
-    /*addEmptyLayer();
-    JComboBox layers = new JComboBox(this.layerOptions);
-    //this.currentLayer = Integer.valueOf((Integer) layers.getSelectedItem());
-    layers.setActionCommand("create layer");
-    layers.addActionListener(this);
-    currentLayerPanel.add(layers);*/
-
     //Filter Transformations
     JPanel filterPanel = new JPanel();
     filterPanel.setBorder(BorderFactory.createTitledBorder("Filter"));
@@ -177,18 +176,18 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     mainPanel.add(filterPanel);
 
 
-
-
     //show an image with a scrollbar
     this.imagePanel = new JPanel();
     //a border around the panel with a caption
     imagePanel.setBorder(BorderFactory.createTitledBorder("Showing an image"));
-    imagePanel.setLayout(new GridLayout(1, 0, 10, 10));
+    imagePanel.setLayout(new FlowLayout());
     imagePanel.setVisible(true);
     mainPanel.add(imagePanel);
 
-  }
 
+
+
+  }
   public void showImageHelp() {
     if (this.numLayers > 0 && this.imgImported) {
       this.imageLabel = new JLabel();
@@ -206,7 +205,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   public void updateTopVisibleLayer(BufferedImage buff) {
     this.topVisibleLayer = buff;
   }
-
 
   public void emitActionEvent(String cmd) {
     for ( IViewListener listener : this.iViewListeners ){
@@ -230,7 +228,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
       case "open file":
         final JFileChooser openChooser = new JFileChooser(".");
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-            "JPG PNG PPM Images", "jpg", "pmm", "png");
+            "JPG PNG PPM Images", "jpg", "pmm", "png","jpeg");
         openChooser.setFileFilter(filter);
         int retvalue = openChooser.showOpenDialog(SwingFrame.this);
         if (retvalue == JFileChooser.APPROVE_OPTION) {
@@ -268,7 +266,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         }
 
         break;
-
       case "remove":
         try {
           String text = removeTextField.getText();
@@ -281,7 +278,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
           ex.printStackTrace();
         }
         break;
-
       case "copy":
         try {
           String text = copyTextField.getText();
@@ -295,6 +291,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         }
         break;
 
+
       case "save file":
         final JFileChooser saveChooser = new JFileChooser(".");
         int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
@@ -303,22 +300,19 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
           fileSaveDisplay.setText(f.getAbsolutePath());
         }
         break;
-
       case "sharpen":
         this.emitActionEvent("sharpen");
         break;
-
       case "blur":
         this.emitActionEvent("blur");
         break;
-
       case "sepia":
         this.emitActionEvent("sepia");
         break;
-
       case "greyscale":
         this.emitActionEvent("greyscale");
         break;
+
     }
   }
 

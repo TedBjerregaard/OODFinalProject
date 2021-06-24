@@ -98,6 +98,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           int index = this.model.getNumLayers();
          /* if (index > this.model.getNumLayers() || index < 0) {
             renderMessageHelp(view, "invalid layer index\n");
+
             break;
           }*/
           this.model.createLayer(index);
@@ -109,9 +110,8 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "current":
           int currentIndex = in.nextInt();
-          if (currentIndex >= this.model.getNumLayers() || currentIndex < 0 ||
-              this.model.getNumLayers() == 0) {
-            renderMessageHelp(view, "invalid layer index to set to current\n");
+          if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
+            renderMessageHelp(view, "invalid layer index\n");
             break;
           }
           this.model.setCurrentLayer(currentIndex);
@@ -157,14 +157,13 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           IImageLayer topVisible = this.model.getTopVisibleLayer();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
-          renderMessageHelp(this.view, fileNameSave + " Saved" + "\n");
+          renderMessageHelp(view, fileNameSave + " Saved" + "\n");
           this.updateTopmostVisible();
 
           break;
 
         case "copy":
           int layerIndex = in.nextInt();
-
           IImageLayer copyTo = this.model.getLayerAt(layerIndex);
 
           if(!copyTo.isEmptyLayer()) {
@@ -175,17 +174,16 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.copyCurrentLayer(layerIndex);
           renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
           this.updateTopmostVisible();
+
           break;
 
         case "remove":
           int layerIndexRemove = in.nextInt();
-
           if (layerIndexRemove >= this.model.getNumLayers() || layerIndexRemove < 0 ||
               this.model.getNumLayers() == 0) {
             renderMessageHelp(view, "invalid layer index to remove\n");
             break;
           }
-
           this.model.removeLayer(layerIndexRemove);
           renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
           this.updateTopmostVisible();
@@ -556,38 +554,44 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
   public void updateTopmostVisible() {
-
     if (this.model.getNumLayers() == 0) {
       this.view.updateTopVisibleLayer(null);
       return;
     }
 
     String layerPath = this.model.getTopVisibleLayer().getName();
-    try {
-      BufferedImage buffImage = ImageIO.read(new File(layerPath));
-      this.view.updateTopVisibleLayer(buffImage);
-      renderMessageHelp(view, "file pushed to frame" + "\n");
+    //ppm case
+    if (this.model.getTopVisibleLayer().getFileType().equals("ppm")) {
+      File file = new File(layerPath);
+      Image imgFrom = this.model.getTopVisibleLayer().getImage();
+      BufferedImage buff = new BufferedImage(imgFrom.getWidth(),imgFrom.getHeight(),
+          TYPE_INT_RGB);
+      for (int row = 0; row < buff.getHeight(); row++) {
+        for (int col = 0; col < buff.getWidth(); col++) {
+          Pixel currentPix = imgFrom.getPixel(row, col);
+          PixelColor pixColor = currentPix.getColor();
+          Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
+              pixColor.getBlue());
+          int colorInt = currentColor.getRGB();
+          buff.setRGB(col, row, colorInt);
 
+        }
+      }
+      this.view.updateTopVisibleLayer(buff);
+      renderMessageHelp(view, "file pushed to frame" + "\n");
     }
-    catch (IOException io) {
-      throw new IllegalArgumentException(io.getMessage()); //TODO: fix to render a message to viewer
-    }
-/*
-    IImageLayer layer = this.model.getTopVisibleLayer();
-    Image img = layer.getImage();
-    BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(),
-        TYPE_INT_RGB);
-    for (int row = 0; row < buff.getHeight(); row++) {
-      for (int col = 0; col < buff.getWidth(); col++) {
-        Pixel currentPix = img.getPixel(row, col);
-        PixelColor pixColor = currentPix.getColor();
-        Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
-            pixColor.getBlue());
-        int colorInt = currentColor.getRGB();
-        buff.setRGB(col, row, colorInt);
+
+    else {
+      try {
+        BufferedImage buffImage = ImageIO.read(new File(layerPath));
+        this.view.updateTopVisibleLayer(buffImage);
+        renderMessageHelp(view, "file pushed to frame" + "\n");
+
+      }
+      catch (IOException io) {
+        new IllegalArgumentException(io.getMessage());
       }
     }
-    this.view.updateTopVisibleLayer(buff);*/
 
 
   }
