@@ -209,7 +209,7 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
   @Override
   public void makeVisible() {
     IImageLayer current = this.layers.get(this.currentLayer);
-    current.makeInvisible();
+    current.makeVisible();
   }
 
 
@@ -246,6 +246,16 @@ public class ComplexImageProcessorModel implements IPModel, MultiLayerIPModel {
   @Override
   public IImageLayer getLayerAt(int i) {
     return this.layers.get(i);
+  }
+
+  @Override
+  public boolean hasVisibleLayer() {
+    for (int i = 0; i < this.getNumLayers(); i++) {
+      if (this.layers.get(i).isVisible()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override

@@ -47,13 +47,14 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private JTextField currentTextField;
   private JTextField removeTextField;
   private JTextField copyTextField;
+  private JTextField saveTextField;
 
   public SwingFrame() {
     super();
     this.iViewListeners = new ArrayList<>();
 
     setTitle("Image Processor");
-    setSize(400, 400);
+    setSize(600, 600);
 
     mainPanel = new JPanel();
     //for elements to be arranged vertically within this panel
@@ -64,27 +65,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     //dialog boxes
     JPanel dialogBoxesPanel = new JPanel();
-    dialogBoxesPanel.setBorder(BorderFactory.createTitledBorder("Import/Save/Current"));
+    dialogBoxesPanel.setBorder(BorderFactory.createTitledBorder("Layer/File Operations"));
     dialogBoxesPanel.setLayout(new BoxLayout(dialogBoxesPanel, BoxLayout.PAGE_AXIS));
     mainPanel.add(dialogBoxesPanel);
-
-    //file open
-    JPanel fileOpenPanel = new JPanel();
-    fileOpenPanel.setLayout(new FlowLayout());
-    dialogBoxesPanel.add(fileOpenPanel);
-    JButton fileOpenButton = new JButton("Open a file");
-    fileOpenButton.setActionCommand("open file");
-    fileOpenButton.addActionListener(this);
-    fileOpenPanel.add(fileOpenButton);
-
-    //file save
-    JPanel fileSavePanel = new JPanel();
-    fileSavePanel.setLayout(new FlowLayout());
-    dialogBoxesPanel.add(fileSavePanel);
-    JButton fileSaveButton = new JButton("Save a file");
-    fileSaveButton.setActionCommand("save file");
-    fileSaveButton.addActionListener(this);
-    fileSavePanel.add(fileSaveButton);
 
     //create layer
     JPanel createLayerPanel = new JPanel();
@@ -98,7 +81,48 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     this.numLayers = 1;
     this.currentLayer = 0;
 
+    //file open
+    JPanel fileOpenPanel = new JPanel();
+    fileOpenPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(fileOpenPanel);
+    JButton fileOpenButton = new JButton("Open a file");
+    fileOpenButton.setActionCommand("open file");
+    fileOpenButton.addActionListener(this);
+    fileOpenPanel.add(fileOpenButton);
 
+    //import multilayered image
+    JPanel importMultiPanel = new JPanel();
+    importMultiPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(importMultiPanel);
+    JButton importMultiButton = new JButton("Import Multilayered Image");
+    importMultiButton.setActionCommand("import");
+    importMultiButton.addActionListener(this);
+    importMultiPanel.add(importMultiButton);
+
+    //file save
+    JPanel fileSavePanel = new JPanel();
+    fileSavePanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(fileSavePanel);
+
+    JLabel saveLabel = new JLabel("Save file type (jpeg, png, or ppm): ");
+    saveTextField = new JTextField(5);
+    saveLabel.setLabelFor(saveTextField);
+    fileSavePanel.add(saveLabel);
+    fileSavePanel.add(saveTextField);
+
+    JButton fileSaveButton = new JButton("Save a file");
+    fileSaveButton.setActionCommand("save file");
+    fileSaveButton.addActionListener(this);
+    fileSavePanel.add(fileSaveButton);
+
+    //export multilayered image
+    JPanel exportMultiPanel = new JPanel();
+    exportMultiPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(exportMultiPanel);
+    JButton exportMultiButton = new JButton("Export Multilayered Image");
+    exportMultiButton.setActionCommand("export");
+    exportMultiButton.addActionListener(this);
+    exportMultiPanel.add(exportMultiButton);
 
     //set current layer
     JPanel currentLayerPanel = new JPanel();
@@ -137,7 +161,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     JPanel removeLayerPanel = new JPanel();
     currentLayerPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(removeLayerPanel);
-    JLabel removeLabel = new JLabel("remove layer #: ");
+    JLabel removeLabel = new JLabel("Remove layer #: ");
     removeTextField = new JTextField(5);
     removeLabel.setLabelFor(removeTextField);
     removeLayerPanel.add(removeLabel);
@@ -158,7 +182,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     JPanel changeVisibilityPanel = new JPanel();
     changeVisibilityPanel.setLayout(new FlowLayout());
     visibilityPanel.add(changeVisibilityPanel);
-    JLabel visibility = new JLabel("set visibility of current layer: ");
+    JLabel visibility = new JLabel("Set visibility of current layer: ");
     changeVisibilityPanel.add(visibility);
 
     //visible button
@@ -175,7 +199,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     //Filter Transformations
     JPanel filterPanel = new JPanel();
-    filterPanel.setBorder(BorderFactory.createTitledBorder("Filter"));
+    filterPanel.setBorder(BorderFactory.createTitledBorder("Image Operation"));
     filterPanel.setLayout(new FlowLayout());
     dialogBoxesPanel.add(filterPanel);
 
@@ -220,6 +244,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
       this.topmostVisibleImg = new ImageIcon(this.topVisibleLayer);
       this.imageLabel.setIcon(this.topmostVisibleImg);
       this.imagePanel.add(this.imageLabel);
+
     }
   }
 
@@ -257,18 +282,42 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
             "JPG PNG PPM Images", "jpg", "ppm", "png","jpeg");
         openChooser.setFileFilter(filter);
-        int retvalue = openChooser.showOpenDialog(SwingFrame.this);
-        if (retvalue == JFileChooser.APPROVE_OPTION) {
+        int retValue = openChooser.showOpenDialog(SwingFrame.this);
+        if (retValue == JFileChooser.APPROVE_OPTION) {
           File f = openChooser.getSelectedFile();
-          f.getName();
           String path = f.getAbsolutePath();
           this.emitActionEvent("load " + path);
           this.imgImported = true;
           this.showImageHelp();
-          //emitLoadEvent(f.getAbsolutePath());
-
+          this.imagePanel.updateUI();
         }
         break;
+
+      case "import":
+        final JFileChooser importChooser = new JFileChooser(".");
+        FileNameExtensionFilter txtFilter = new FileNameExtensionFilter(
+            "text file", "txt");
+        importChooser.setFileFilter(txtFilter);
+        int importValue = importChooser.showOpenDialog(SwingFrame.this);
+        if (importValue == JFileChooser.APPROVE_OPTION) {
+          File f = importChooser.getSelectedFile();
+          String path = f.getAbsolutePath();
+          this.emitActionEvent("import " + path);
+          this.imgImported = true;
+          this.showImageHelp();
+          this.imagePanel.updateUI();
+        }
+        break;
+
+      case "export":
+        final JFileChooser exportChooser = new JFileChooser(".");
+        int exportRetValue = exportChooser.showSaveDialog(SwingFrame.this);
+        if (exportRetValue == JFileChooser.APPROVE_OPTION) {
+          File f = exportChooser.getSelectedFile();
+          this.emitActionEvent("export " + f.getName());
+        }
+        break;
+
       case "create layer":
         this.emitActionEvent("create ");
         this.numLayers ++;
@@ -277,6 +326,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         } catch (IOException exception) {
           exception.printStackTrace();
         }
+        this.imagePanel.updateUI();
         break;
 
       case "current":
@@ -291,8 +341,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         } catch (NumberFormatException ex) {
           ex.printStackTrace();
         }
-
+        this.imagePanel.updateUI();
         break;
+
       case "remove":
         try {
           String text = removeTextField.getText();
@@ -304,6 +355,8 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         } catch (NumberFormatException ex) {
           ex.printStackTrace();
         }
+
+        this.imagePanel.updateUI();
         break;
       case "copy":
         try {
@@ -316,37 +369,51 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
         } catch (NumberFormatException ex) {
           ex.printStackTrace();
         }
+
+        this.imagePanel.updateUI();
         break;
 
       case "visible":
         this.emitActionEvent("visible");
+        this.imagePanel.updateUI();
         break;
 
       case "invisible":
         this.emitActionEvent("invisible");
+        this.imagePanel.updateUI();
         break;
+
       case "save file":
+        String fileType = saveTextField.getText();
         final JFileChooser saveChooser = new JFileChooser(".");
-        FileNameExtensionFilter saveFilter = new FileNameExtensionFilter(
-            "JPG PNG PPM Images", "jpg", "ppm", "png","jpeg");
-        saveChooser.setFileFilter(saveFilter);
-        int chooserRetvalue = saveChooser.showSaveDialog(SwingFrame.this);
-        if (chooserRetvalue == JFileChooser.APPROVE_OPTION) {
+        int chooserRetValue = saveChooser.showSaveDialog(SwingFrame.this);
+        if (chooserRetValue == JFileChooser.APPROVE_OPTION) {
           File f = saveChooser.getSelectedFile();
-          this.emitActionEvent("save " + f.getAbsolutePath());
+          this.emitActionEvent("save " + f.getAbsolutePath() + " " + fileType);
+          this.saveTextField.setText("");
         }
+
+        this.imagePanel.updateUI();
         break;
+
       case "sharpen":
         this.emitActionEvent("sharpen");
+        this.imagePanel.updateUI();
         break;
+
       case "blur":
         this.emitActionEvent("blur");
+        this.imagePanel.updateUI();
         break;
+
       case "sepia":
         this.emitActionEvent("sepia");
+        this.imagePanel.updateUI();
         break;
+
       case "greyscale":
         this.emitActionEvent("greyscale");
+        this.imagePanel.updateUI();
         break;
 
     }

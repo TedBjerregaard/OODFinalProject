@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
@@ -98,7 +99,6 @@ public class ImageProcessorController implements IPController, IViewListener {
           int index = this.model.getNumLayers();
          /* if (index > this.model.getNumLayers() || index < 0) {
             renderMessageHelp(view, "invalid layer index\n");
-
             break;
           }*/
           this.model.createLayer(index);
@@ -147,6 +147,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "import":
           String fileNameImport = in.next();
+          this.model = new ComplexImageProcessorModel(new SimpleImageProcessorModel());
           this.importMultiLayeredImage(fileNameImport);
           renderMessageHelp(view, fileNameImport + " Imported" + "\n");
           this.updateTopmostVisible();
@@ -155,10 +156,10 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "save":
           String fileNameSave = in.next();
-
+          String fileType = in.next();
+          String fileTypeSave = fileType.toLowerCase(Locale.ROOT);
 
           IImageLayer topVisible = this.model.getTopVisibleLayer();
-          String fileTypeSave = topVisible.getFileType();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
           renderMessageHelp(view, fileNameSave + " Saved" + "\n");
 
@@ -175,8 +176,10 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           this.model.copyCurrentLayer(layerIndex);
           renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
-          BufferedImage CBuff = getBuff(this.model.getTopVisibleLayer().getImage());
-          this.view.updateTopVisibleLayer(CBuff);
+          if (layerIndex == this.model.getNumLayers() - 1) {
+            BufferedImage CBuff = getBuff(this.model.getCurrentImage()); //TODO: check this loop
+            this.view.updateTopVisibleLayer(CBuff);
+          }
           break;
 
         case "remove":
@@ -188,8 +191,8 @@ public class ImageProcessorController implements IPController, IViewListener {
           }
           this.model.removeLayer(layerIndexRemove);
           renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
-          BufferedImage RBuff = getBuff(this.model.getTopVisibleLayer().getImage());
-          this.view.updateTopVisibleLayer(RBuff);
+          BufferedImage rBuff = getTopMostVisibleImage();
+          this.view.updateTopVisibleLayer(rBuff);
 
           break;
 
@@ -197,7 +200,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.makeVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " is now Visible" + "\n");
-          BufferedImage VBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage VBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(VBuff);
 
           break;
@@ -206,14 +209,14 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.makeInvisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex()
               + " is now Invisible" + "\n");
-          BufferedImage IBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage IBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(IBuff);
 
           break;
 
         case "sepia":
           this.model.applySepia();
-          BufferedImage buff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage buff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(buff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sepia applied" + "\n");
@@ -223,7 +226,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "greyscale":
           this.model.applyGreyscale();
-          BufferedImage greyBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage greyBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(greyBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Greyscale applied" + "\n");
@@ -233,7 +236,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "blur":
           this.model.blur();
-          BufferedImage blurBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage blurBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(blurBuff);
           //this.updateTopmostVisible();
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
@@ -244,7 +247,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "sharpen":
           this.model.sharpen();
-          BufferedImage sharpBuff = getBuff(this.model.getTopVisibleLayer().getImage());
+          BufferedImage sharpBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(sharpBuff);
           renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
               " Sharpen applied" + "\n");
@@ -584,16 +587,14 @@ public class ImageProcessorController implements IPController, IViewListener {
     return buff;
 
    /* if (filetype.equals("ppm")) {
-
     }
     else {
-
     }*/
   }
 
   public void updateTopmostVisible() {
-    if (this.model.getNumLayers() == 0) {
-      this.view.updateTopVisibleLayer(null);
+    if (!this.model.hasVisibleLayer()) {
+      this.view.updateTopVisibleLayer(new BufferedImage(0,0, TYPE_INT_RGB));
       return;
     }
 
@@ -629,8 +630,15 @@ public class ImageProcessorController implements IPController, IViewListener {
         new IllegalArgumentException(io.getMessage());
       }
     }
+  }
 
-
+  private BufferedImage getTopMostVisibleImage() {
+    if (!this.model.hasVisibleLayer()) {
+      return new BufferedImage(1,1, TYPE_INT_RGB);
+    }
+    else {
+      return getBuff(this.model.getTopVisibleLayer().getImage());
+    }
   }
 
 }
