@@ -26,6 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -48,6 +49,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private JTextField removeTextField;
   private JTextField copyTextField;
   private JTextField saveTextField;
+  private JTextArea commandTextArea;
 
   public SwingFrame() {
     super();
@@ -235,6 +237,12 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     this.imageLabel = new JLabel();
 
 
+    //text area with a scrollbar
+    commandTextArea = new JTextArea(15, 50);
+    JScrollPane commandTextPane = new JScrollPane(commandTextArea);
+    commandTextArea.setLineWrap(true);
+    commandTextPane.setBorder(BorderFactory.createTitledBorder("Scrollable text area"));
+    mainPanel.add(commandTextPane);
 
 
   }
@@ -321,11 +329,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
       case "create layer":
         this.emitActionEvent("create ");
         this.numLayers ++;
-        try {
-          this.renderMessage("layer created");
-        } catch (IOException exception) {
-          exception.printStackTrace();
-        }
         this.imagePanel.updateUI();
         break;
 
@@ -439,6 +442,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
    */
   @Override
   public void renderMessage(String message) throws IOException {
-
+    commandTextArea.append(message);
   }
 }

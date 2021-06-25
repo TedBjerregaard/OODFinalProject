@@ -97,25 +97,22 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "create":
           int index = this.model.getNumLayers();
-         /* if (index > this.model.getNumLayers() || index < 0) {
-            renderMessageHelp(view, "invalid layer index\n");
-            break;
-          }*/
           this.model.createLayer(index);
           this.model.setCurrentLayer(index);
-          renderMessageHelp(view, "layer " + this.model.getCurrentLayerIndex() + " created\n");
-          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayerIndex()
+          renderMessageHelp(this.view, "layer " + this.model.getCurrentLayerIndex() + " created\n");
+          renderMessageHelp(this.view, "Current Layer: " + this.model.getCurrentLayerIndex()
               + "\n Layers in IP: " + this.model.getNumLayers() + "\n");
           break;
 
         case "current":
           int currentIndex = in.nextInt();
           if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
-            renderMessageHelp(view, "invalid layer index\n");
+            renderMessageHelp(this.view, "invalid layer index\n");
             break;
           }
           this.model.setCurrentLayer(currentIndex);
-          renderMessageHelp(view, "Current Layer: " + this.model.getCurrentLayerIndex() + "\n");
+
+          renderMessageHelp(this.view, "Current Layer: " + this.model.getCurrentLayerIndex() + "\n");
 
           break;
 
@@ -235,6 +232,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           break;
 
         case "blur":
+
           this.model.blur();
           BufferedImage blurBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(blurBuff);
@@ -329,6 +327,7 @@ public class ImageProcessorController implements IPController, IViewListener {
     if (fileTag.equals("ppm")) {
       Image newImage = this.importPPM(fileName);
       IImageLayer current = this.model.getCurrentLayer();
+
 
       this.checkWidthAndHeight(newImage, current);
       current.replaceImage(newImage);
@@ -571,16 +570,15 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
   public BufferedImage getBuff(Image img) {
-    BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(),
-        TYPE_INT_RGB);
-    for (int row = 0; row < buff.getHeight(); row++) {
-      for (int col = 0; col < buff.getWidth(); col++) {
-        Pixel currentPix = img.getPixel(row, col);
+    BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(), TYPE_INT_RGB);
+    for (int x = 0; x < buff.getWidth(); x++) {
+      for (int y = 0; y < buff.getHeight(); y++) {
+        Pixel currentPix = img.getPixel(y, x);
         PixelColor pixColor = currentPix.getColor();
         Color currentColor = new Color(pixColor.getRed(), pixColor.getGreen(),
             pixColor.getBlue());
         int colorInt = currentColor.getRGB();
-        buff.setRGB(col, row, colorInt);
+        buff.setRGB(x, y, colorInt);
 
       }
     }
@@ -637,7 +635,9 @@ public class ImageProcessorController implements IPController, IViewListener {
       return new BufferedImage(1,1, TYPE_INT_RGB);
     }
     else {
-      return getBuff(this.model.getTopVisibleLayer().getImage());
+      Image bi = this.model.getTopVisibleLayer().getImage();
+      BufferedImage buf = getBuff(bi);
+      return getBuff(bi);
     }
   }
 
