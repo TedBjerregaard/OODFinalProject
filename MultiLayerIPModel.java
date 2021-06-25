@@ -87,17 +87,55 @@ public interface MultiLayerIPModel {
    */
   int getNumLayers();
 
+  /**
+   * Returns the current layer in a multilayered image for image processing.
+   *
+   * @return Current layer in multilayered image.
+   */
   IImageLayer getCurrentLayer();
 
+  /**
+   * Sets the width of a multilayered image.
+   *
+   * @param w Width of multilayered image.
+   */
   void setWidth(int w);
 
+  /**
+   * Sets the height of a multilayered image.
+   *
+   * @param h Height of multilayered image.
+   */
   void setHeight(int h);
 
+  /**
+   * Getter for the height of a multilayered image.
+   *
+   * @return Height of multilayered image.
+   */
   int getHeight();
 
+  /**
+   * Getter for the width of a multilayered image.
+   *
+   * @return Width of multilayered image
+   */
   int getWidth();
 
+  /**
+   * Returns the layer of a multilayered image at a specified index.
+   *
+   * @param i    Index of layer to be retrieved.
+   * @return     Layer at given index.
+   */
   IImageLayer getLayerAt(int i);
+
+  /**
+   * Returns whether this multilayered image has any visible layers.
+   *
+   * @return Boolean representing if there are currently any visible layers.
+   */
+  boolean hasVisibleLayer();
 
 
 }

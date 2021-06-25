@@ -6,8 +6,8 @@ package model;
  */
 public class Pixel {
 
-  private final int x;
-  private final int y;
+  private final int col;
+  private final int row;
   private final PixelColor color;
 
   /**
@@ -17,9 +17,9 @@ public class Pixel {
    * @param y     Y position of this Pixel.
    * @param color Color of this pixel (r,g,b).
    */
-  public Pixel(int x, int y, PixelColor color) {
-    this.x = x;
-    this.y = y;
+  public Pixel(int y, int x, PixelColor color) {
+    this.row = y;
+    this.col = x;
     this.color = color;
   }
 
@@ -43,8 +43,8 @@ public class Pixel {
    *
    * @return Int representing the X-value.
    */
-  public int getX() {
-    return this.x;
+  public int getCol() {
+    return this.col;
   }
 
   /**
@@ -52,8 +52,8 @@ public class Pixel {
    *
    * @return Int representing the Y-value.
    */
-  public int getY() {
-    return this.y;
+  public int getRow() {
+    return this.row;
   }
 
   /**

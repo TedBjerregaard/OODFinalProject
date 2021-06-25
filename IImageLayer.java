@@ -103,5 +103,10 @@ public interface IImageLayer {
    */
   int getImageWidth();
 
+  /**
+   * Is the given layer empty (a blank layer)?
+   *
+   * @return Whether or not this layer is empty.
+   */
   boolean isEmptyLayer();
 }

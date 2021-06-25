@@ -1,12 +1,8 @@
 package controller;
 
 import static java.awt.image.BufferedImage.*;
-
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,7 +28,7 @@ import model.SimpleImageProcessorModel;
 import view.IPView;
 import view.IViewListener;
 import view.ImageProcessorView;
-import view.SwingFrame;
+
 
 /**
  * A controller used in the implementation of an image processor. Able to process images with manual
@@ -77,7 +73,7 @@ public class ImageProcessorController implements IPController, IViewListener {
       switch (command) {
         case "quit":
           quit = true;
-          renderMessageHelp(view, "IP closed");
+          renderMessageHelp(this.view, "IP closed");
           break;
 
         case "txtCommand":
@@ -106,14 +102,13 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "current":
           int currentIndex = in.nextInt();
-          if (currentIndex > this.model.getNumLayers() || currentIndex < 0) {
+          if (currentIndex >= this.model.getNumLayers() || currentIndex < 0) {
             renderMessageHelp(this.view, "invalid layer index\n");
             break;
           }
           this.model.setCurrentLayer(currentIndex);
 
           renderMessageHelp(this.view, "Current Layer: " + this.model.getCurrentLayerIndex() + "\n");
-
           break;
 
         case "load":
@@ -122,16 +117,16 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           try {
             this.importImage(fileName);
-            renderMessageHelp(view, "Top visible Layer: " +
+            renderMessageHelp(this.view, "Top visible Layer: " +
                 this.model.getTopVisibleLayer().getName() + "\n");
             BufferedImage SBuff = getBuff(this.model.getTopVisibleLayer().getImage());
             this.view.updateTopVisibleLayer(SBuff);
           } catch (IllegalArgumentException e) {
-            renderMessageHelp(view, "Image Wrong Size\n");
+            renderMessageHelp(this.view, "Image Wrong Size\n");
             break;
           }
 
-          renderMessageHelp(view, fileName + " loaded to layer: "
+          renderMessageHelp(this.view, fileName + " loaded to layer: "
               + this.model.getCurrentLayerIndex() + "\n");
 
           break;
@@ -139,14 +134,17 @@ public class ImageProcessorController implements IPController, IViewListener {
         case "export":
           String fileNameExport = in.next();
           this.exportMultiLayeredImage(fileNameExport);
-          renderMessageHelp(view, fileNameExport + " Exported" + "\n");
+          renderMessageHelp(this.view, fileNameExport + " Exported" + "\n");
           break;
 
         case "import":
           String fileNameImport = in.next();
           this.model = new ComplexImageProcessorModel(new SimpleImageProcessorModel());
           this.importMultiLayeredImage(fileNameImport);
-          renderMessageHelp(view, fileNameImport + " Imported" + "\n");
+          renderMessageHelp(this.view, fileNameImport + " Imported" + "\n");
+          renderMessageHelp(this.view, "Multilayered image information: \n");
+          renderMessageHelp(this.view, "Layers: " + this.model.getNumLayers() + "\n");
+
           this.updateTopmostVisible();
 
           break;
@@ -158,21 +156,29 @@ public class ImageProcessorController implements IPController, IViewListener {
 
           IImageLayer topVisible = this.model.getTopVisibleLayer();
           this.exportImage(topVisible.getImage(), fileNameSave, fileTypeSave);
-          renderMessageHelp(view, fileNameSave + " Saved" + "\n");
+          renderMessageHelp(this.view, fileNameSave + " Saved" + "\n");
 
           break;
 
         case "copy":
           int layerIndex = in.nextInt();
-          IImageLayer copyTo = this.model.getLayerAt(layerIndex);
 
-          if(!copyTo.isEmptyLayer()) {
-            renderMessageHelp(view, "layer attempting to copy to is not empty");
+          try {
+            IImageLayer copyTo = this.model.getLayerAt(layerIndex);
+            if(!copyTo.isEmptyLayer()) {
+              renderMessageHelp(this.view, "Layer attempting to copy to is not empty");
+              break;
+            }
+          }
+          catch (IndexOutOfBoundsException e) {
+            renderMessageHelp(this.view, "Invalid index to copy to");
             break;
           }
 
+
+
           this.model.copyCurrentLayer(layerIndex);
-          renderMessageHelp(view, "Layer Copied to: " + layerIndex + "\n");
+          renderMessageHelp(this.view, "Layer Copied to: " + layerIndex + "\n");
           if (layerIndex == this.model.getNumLayers() - 1) {
             BufferedImage CBuff = getBuff(this.model.getCurrentImage()); //TODO: check this loop
             this.view.updateTopVisibleLayer(CBuff);
@@ -183,11 +189,11 @@ public class ImageProcessorController implements IPController, IViewListener {
           int layerIndexRemove = in.nextInt();
           if (layerIndexRemove >= this.model.getNumLayers() || layerIndexRemove < 0 ||
               this.model.getNumLayers() == 0) {
-            renderMessageHelp(view, "invalid layer index to remove\n");
+            renderMessageHelp(this.view, "Invalid layer index to remove\n");
             break;
           }
           this.model.removeLayer(layerIndexRemove);
-          renderMessageHelp(view, "layer: " + layerIndexRemove + " Removed" + "\n");
+          renderMessageHelp(this.view, "Layer: " + layerIndexRemove + " Removed" + "\n");
           BufferedImage rBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(rBuff);
 
@@ -195,7 +201,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "visible":
           this.model.makeVisible();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+          renderMessageHelp(this.view, "layer: " + this.model.getCurrentLayerIndex() +
               " is now Visible" + "\n");
           BufferedImage VBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(VBuff);
@@ -204,7 +210,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         case "invisible":
           this.model.makeInvisible();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex()
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex()
               + " is now Invisible" + "\n");
           BufferedImage IBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(IBuff);
@@ -215,7 +221,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.applySepia();
           BufferedImage buff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(buff);
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex() +
               " Sepia applied" + "\n");
           //this.updateTopmostVisible();
 
@@ -225,7 +231,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.applyGreyscale();
           BufferedImage greyBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(greyBuff);
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex() +
               " Greyscale applied" + "\n");
           //this.updateTopmostVisible();
 
@@ -237,7 +243,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           BufferedImage blurBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(blurBuff);
           //this.updateTopmostVisible();
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex() + " Blur applied"
               + "\n");
 
 
@@ -247,7 +253,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           this.model.sharpen();
           BufferedImage sharpBuff = getTopMostVisibleImage();
           this.view.updateTopVisibleLayer(sharpBuff);
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() +
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex() +
               " Sharpen applied" + "\n");
           //this.updateTopmostVisible();
 
@@ -272,16 +278,23 @@ public class ImageProcessorController implements IPController, IViewListener {
               color2MinVal);
           int maxColorVal = in.nextInt();
           this.model.createImage(tileSize, numTiles, color1, color2, maxColorVal);
-          renderMessageHelp(view, "layer: " + this.model.getCurrentLayerIndex() + " " + numTiles +
+          renderMessageHelp(this.view, "Layer: " + this.model.getCurrentLayerIndex() + " " + numTiles +
               " x " + numTiles + "tile Checkerboard image created" + "\n");
           break;
 
         default:
-          renderMessageHelp(view, "Not a supported command. Try again." + "\n");
+          renderMessageHelp(this.view, "Not a supported command. Try again." + "\n");
       }
     }
   }
 
+  /**
+   * Imports a multilayered image in a specific text file format. We gave a tag "IP3" to the file
+   * to signal that this is a text file with this format that can be imported as a multilayered
+   * image.
+   *
+   * @param fileName Name of text file used to import a multilayered image.
+   */
   private void importMultiLayeredImage(String fileName) {
 
     try {
@@ -311,7 +324,7 @@ public class ImageProcessorController implements IPController, IViewListener {
           }
 
         } else {
-          throw new IllegalArgumentException("bad file format");
+          throw new IllegalArgumentException("Bad file format");
         }
       }
     } catch (IOException io) {
@@ -319,6 +332,12 @@ public class ImageProcessorController implements IPController, IViewListener {
     }
   }
 
+  /**
+   * Imports an image and retrieves the pixel data needed to represent an image in the way we have
+   * chosen for this implementation. Behaves differently depending on the file type of the image.
+   *
+   * @param fileName Name of the image file to be imported.
+   */
   private void importImage(String fileName) {
 
     FileInputStream fileIn;
@@ -329,7 +348,7 @@ public class ImageProcessorController implements IPController, IViewListener {
       IImageLayer current = this.model.getCurrentLayer();
 
 
-      this.checkWidthAndHeight(newImage, current);
+      this.checkWidthAndHeight(newImage);
       current.replaceImage(newImage);
       current.setFiletype(fileTag);
       current.setName(fileName);
@@ -353,7 +372,7 @@ public class ImageProcessorController implements IPController, IViewListener {
 
         IImageLayer current = this.model.getCurrentLayer();
 
-        this.checkWidthAndHeight(imported, current);
+        this.checkWidthAndHeight(imported);
 
         ImageReader reader = imageReader.next();
         current.setName(fileName);
@@ -373,6 +392,14 @@ public class ImageProcessorController implements IPController, IViewListener {
     }
   }
 
+  /**
+   * Helper method for the import image method that deals specifically with importing JPEG and PNG
+   * type files in this implementation.
+   *
+   * @param buffImage      BufferedImage to be imported.
+   * @return               Imported Image.
+   * @throws IOException   Thrown if importing fails.
+   */
   private Image importHelper(BufferedImage buffImage) throws IOException {
 
 
@@ -397,6 +424,14 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
 
+  /**
+   * Helper method for the importImage method that deals specifically with importing PPM type
+   * Images.
+   *
+   * @param filename                  Name of Image file to be imported.
+   * @return                          Imported PPM image.
+   * @throws IllegalArgumentException Thrown if the given file name is invalid.
+   */
   private Image importPPM(String filename) throws IllegalArgumentException {
 
     Scanner sc;
@@ -454,7 +489,13 @@ public class ImageProcessorController implements IPController, IViewListener {
     return new Image(height, width, maxValue, pixelArray);
   }
 
-  private void checkWidthAndHeight(Image image, IImageLayer current) {
+  /**
+   * Determines if this image can be imported as part of a multilayered image as all images in a
+   * multilayered image have to have the same size (height and width).
+   *
+   * @param image  Image that is being checked for correct sizing.
+   */
+  private void checkWidthAndHeight(Image image) {
     if (this.model.getCurrentLayerIndex() == 0) {
       int w = image.getWidth();
       int h = image.getHeight();
@@ -467,6 +508,13 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
 
+  /**
+   * Helper method for rendering a message to the user through the text box in the graphical user
+   * interface.
+   *
+   * @param view   The view used to relay the message to the graphical user interface
+   * @param string Message to be outputed.
+   */
   private void renderMessageHelp(IPView view, String string) {
     try {
       view.renderMessage(string);
@@ -475,6 +523,12 @@ public class ImageProcessorController implements IPController, IViewListener {
     }
   }
 
+  /**
+   * Exports a multilayered image as a text file with specific format and a given name that can
+   * then be imported later on by this program to work on later.
+   *
+   * @param fileName name of the text file storing information about a multilayered image.
+   */
   private void exportMultiLayeredImage(String fileName) {
 
     StringBuilder builder = new StringBuilder();
@@ -501,13 +555,17 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
 
-
-
-
+  /**
+   * Exports an image from this multilayered image as a file with the given file type.
+   *
+   * @param image    Image to be exported.
+   * @param fileName Name of the file for this exported image.
+   * @param fileType file extension, type of file, for exported image.
+   */
   public void exportImage(Image image, String fileName, String fileType) {
 
     if (fileType.equals("ppm")) {
-      this.exportPPM(image, fileName, fileType);
+      this.exportPPM(image, fileName);
     } else {
       String finalFileName = fileName + "." + fileType;
 
@@ -533,9 +591,15 @@ public class ImageProcessorController implements IPController, IViewListener {
   }
 
 
-  private void exportPPM(Image image, String fileName, String fileType) {
+  /**
+   * Exports an image as a PPM file.
+   *
+   * @param image     Image to be exported.
+   * @param fileName  Final file name of this exported image.
+   */
+  private void exportPPM(Image image, String fileName) {
     File file;
-    String finalFileName = fileName + "." + fileType;
+    String finalFileName = fileName + ".ppm";
     FileOutputStream fStream = null;
     String imageValues = image.getImageValues(finalFileName);
 
@@ -569,6 +633,13 @@ public class ImageProcessorController implements IPController, IViewListener {
     this.runIP();
   }
 
+  /**
+   * Given an Image, as defined in this implementation, returns a buffered image with the same
+   * characteristics.
+   *
+   * @param img  Image to be represented as a BufferedImage.
+   * @return     BufferedImage of the given image.
+   */
   public BufferedImage getBuff(Image img) {
     BufferedImage buff = new BufferedImage(img.getWidth(),img.getHeight(), TYPE_INT_RGB);
     for (int x = 0; x < buff.getWidth(); x++) {
@@ -583,13 +654,11 @@ public class ImageProcessorController implements IPController, IViewListener {
       }
     }
     return buff;
-
-   /* if (filetype.equals("ppm")) {
-    }
-    else {
-    }*/
   }
 
+  /**
+   * Updates the topmost visible layer after a command has been processed and affected the model.
+   */
   public void updateTopmostVisible() {
     if (!this.model.hasVisibleLayer()) {
       this.view.updateTopVisibleLayer(new BufferedImage(0,0, TYPE_INT_RGB));
@@ -630,13 +699,17 @@ public class ImageProcessorController implements IPController, IViewListener {
     }
   }
 
+  /**
+   * Returns the topmost visible image in this multilayered image.
+   *
+   * @return Topmost visible image.
+   */
   private BufferedImage getTopMostVisibleImage() {
     if (!this.model.hasVisibleLayer()) {
       return new BufferedImage(1,1, TYPE_INT_RGB);
     }
     else {
       Image bi = this.model.getTopVisibleLayer().getImage();
-      BufferedImage buf = getBuff(bi);
       return getBuff(bi);
     }
   }

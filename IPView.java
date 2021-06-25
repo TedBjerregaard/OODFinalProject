@@ -18,7 +18,18 @@ public interface IPView {
    */
   void renderMessage(String message) throws IOException;
 
+  /**
+   * Registers listeneres for action events in this view.
+   *
+   * @param listener An object that reacts to certain events.
+   */
   void registerViewEventListener(IViewListener listener);
 
+  /**
+   * Updates the top visible layer, thus hte image being shown in a graphical user interface with
+   * the given BufferedImage.
+   *
+   * @param buff BufferedImage of the topmost visible image in a multilayered image.
+   */
   void updateTopVisibleLayer(BufferedImage buff);
 }

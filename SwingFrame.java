@@ -1,7 +1,6 @@
 package view;
 
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -12,31 +11,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+/**
+ * View class for this representation of an image processor. This view creates a graphical user
+ * interface that can be used to performed a set of operations on single and multilayered images.
+ */
 public class SwingFrame extends JFrame implements IPView, ActionListener, ItemListener {
   private JPanel mainPanel;
   private JScrollPane mainScrollPane;
-  private JLabel fileOpenDisplay;
-  private JLabel fileSaveDisplay;
   private JLabel imageLabel;
   private JPanel imagePanel;
   private ImageIcon topmostVisibleImg;
@@ -51,6 +45,9 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
   private JTextField saveTextField;
   private JTextArea commandTextArea;
 
+  /**
+   * Constructor this class and the graphical user interface specifically.
+   */
   public SwingFrame() {
     super();
     this.iViewListeners = new ArrayList<>();
@@ -230,10 +227,12 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     //show an image with a scrollbar
     this.imagePanel = new JPanel();
     //a border around the panel with a caption
+
     imagePanel.setBorder(BorderFactory.createTitledBorder("Showing an image"));
     imagePanel.setLayout(new FlowLayout());
     imagePanel.setVisible(true);
-    mainPanel.add(imagePanel);
+    JScrollPane imageTextPane = new JScrollPane(this.imagePanel);
+    mainPanel.add(imageTextPane);
     this.imageLabel = new JLabel();
 
 
@@ -246,6 +245,11 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
 
   }
+
+  /**
+   * Helper method that aids in showing the topmost visible image of a multilayered image in a panel
+   * on the graphical user interface.
+   */
   public void showImageHelp() {
     if (this.numLayers > 0 && this.imgImported) {
       this.imagePanel.remove(this.imageLabel);
@@ -256,6 +260,11 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     }
   }
 
+  /**
+   * Registers listeneres for action events in this view.
+   *
+   * @param listener An object that reacts to certain events.
+   */
   public void registerViewEventListener(IViewListener listener){
     this.iViewListeners.add( Objects.requireNonNull(listener));
   }
@@ -266,6 +275,10 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     this.showImageHelp();
   }
 
+  /**
+   * Relays an action event as a string command to the controller to perform changes to the model.
+   * @param cmd  String command.
+   */
   public void emitActionEvent(String cmd) {
     for ( IViewListener listener : this.iViewListeners ){
       listener.handleActionEvent(cmd);
