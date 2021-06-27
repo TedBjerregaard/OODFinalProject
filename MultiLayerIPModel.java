@@ -135,7 +135,4 @@ public interface MultiLayerIPModel {
    *
    * @return Boolean representing if there are currently any visible layers.
    */
-  boolean hasVisibleLayer();
-
-
-}
+  boolean hasVisibleLayer();}

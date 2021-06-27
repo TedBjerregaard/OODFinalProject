@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -11,24 +12,31 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * View class for this representation of an image processor. This view creates a graphical user
  * interface that can be used to performed a set of operations on single and multilayered images.
  */
-public class SwingFrame extends JFrame implements IPView, ActionListener, ItemListener {
+public class SwingFrame extends JFrame implements IPView, ActionListener {
   private JPanel mainPanel;
   private JScrollPane mainScrollPane;
   private JLabel imageLabel;
@@ -79,6 +87,16 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     this.numLayers = 1;
     this.currentLayer = 0;
+
+
+    //Batch Command
+    JPanel batchCommandPanel = new JPanel();
+    batchCommandPanel.setLayout(new FlowLayout());
+    dialogBoxesPanel.add(batchCommandPanel);
+    JButton batchCommandButton = new JButton("Upload Batch Command text file");
+    batchCommandButton.setActionCommand("batch command");
+    batchCommandButton.addActionListener(this);
+    batchCommandPanel.add(batchCommandButton);
 
     //file open
     JPanel fileOpenPanel = new JPanel();
@@ -227,8 +245,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     //show an image with a scrollbar
     this.imagePanel = new JPanel();
     //a border around the panel with a caption
-
-    imagePanel.setBorder(BorderFactory.createTitledBorder("Showing an image"));
+    imagePanel.setBorder(BorderFactory.createTitledBorder("Topmost Visible Image"));
     imagePanel.setLayout(new FlowLayout());
     imagePanel.setVisible(true);
     JScrollPane imageTextPane = new JScrollPane(this.imagePanel);
@@ -240,7 +257,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     commandTextArea = new JTextArea(15, 50);
     JScrollPane commandTextPane = new JScrollPane(commandTextArea);
     commandTextArea.setLineWrap(true);
-    commandTextPane.setBorder(BorderFactory.createTitledBorder("Scrollable text area"));
+    commandTextPane.setBorder(BorderFactory.createTitledBorder("IP Status"));
     mainPanel.add(commandTextPane);
 
 
@@ -256,6 +273,7 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
       this.topmostVisibleImg = new ImageIcon(this.topVisibleLayer);
       this.imageLabel.setIcon(this.topmostVisibleImg);
       this.imagePanel.add(this.imageLabel);
+      this.repaint();
 
     }
   }
@@ -298,6 +316,21 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
 
     switch (e.getActionCommand()) {
 
+      case "batch command":
+        final JFileChooser cmdChooser = new JFileChooser(".");
+        FileNameExtensionFilter filterCMD = new FileNameExtensionFilter(
+            "TXT Command File", "txt");
+        cmdChooser.setFileFilter(filterCMD);
+        int retValueCMD = cmdChooser.showOpenDialog(SwingFrame.this);
+        if (retValueCMD == JFileChooser.APPROVE_OPTION) {
+          File f = cmdChooser.getSelectedFile();
+          String path = f.getAbsolutePath();
+          this.emitActionEvent("txtCommand " + path);
+          this.imgImported = true;
+          this.showImageHelp();
+          this.imagePanel.updateUI();
+        }
+        break;
       case "open file":
         final JFileChooser openChooser = new JFileChooser(".");
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -435,16 +468,6 @@ public class SwingFrame extends JFrame implements IPView, ActionListener, ItemLi
     }
   }
 
-  /**
-   * Invoked when an item has been selected or deselected by the user. The code written for this
-   * method performs the operations that need to occur when an item is selected (or deselected).
-   *
-   * @param e the event to be processed
-   */
-  @Override
-  public void itemStateChanged(ItemEvent e) {
-
-  }
 
 
   /**

@@ -50,6 +50,7 @@ public class Pixel {
   /**
    * Gets the y-value of this Pixel.
    *
+   *
    * @return Int representing the Y-value.
    */
   public int getRow() {

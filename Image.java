@@ -52,7 +52,7 @@ public class Image {
         Pixel currentPixel = this.pixelArray[row][col];
 
         PixelColor newColor = currentPixel.getTransformedColor(matrix);
-        Pixel newPixel = new Pixel(currentPixel.getX(), currentPixel.getY(), newColor);
+        Pixel newPixel = new Pixel(currentPixel.getCol(), currentPixel.getRow(), newColor);
         newPixList[row][col] = newPixel;
       }
     }
@@ -77,7 +77,7 @@ public class Image {
         Pixel currentPixel = this.pixelArray[row][col];
 
         PixelColor newColor = getNewColor(currentPixel, kernel);
-        Pixel newPixel = new Pixel(currentPixel.getX(), currentPixel.getY(), newColor);
+        Pixel newPixel = new Pixel(currentPixel.getRow(), currentPixel.getCol(),  newColor);
         newPixList[row][col] = newPixel;
       }
     }
@@ -99,14 +99,14 @@ public class Image {
     int newBlue = 0;
     for (int row = 0; row < kernel.getSize(); row++) {
       for (int col = 0; col < kernel.getSize(); col++) {
-        int xValue = current.getX() + kernel.getK(row, col, 0);
-        int yValue = current.getY() + kernel.getK(row, col, 1);
+        int xValue = current.getCol() + kernel.getK(row, col, 0);
+        int yValue = current.getRow() + kernel.getK(row, col, 1);
 
-        if (xValue >= 0 && yValue >= 0 && xValue < height && yValue < width) {
-          newRed += pixelArray[xValue][yValue].getColor().applyKernelRed(kernel.getValue(row, col));
-          newGreen += pixelArray[xValue][yValue].getColor()
+        if (xValue > 0 && yValue > 0 && xValue < this.width && yValue < this.height) {
+          newRed += pixelArray[yValue][xValue].getColor().applyKernelRed(kernel.getValue(row, col));
+          newGreen += pixelArray[yValue][xValue].getColor()
               .applyKernelGreen(kernel.getValue(row, col));
-          newBlue += pixelArray[xValue][yValue].getColor()
+          newBlue += pixelArray[yValue][xValue].getColor()
               .applyKernelBlue(kernel.getValue(row, col));
         }
       }

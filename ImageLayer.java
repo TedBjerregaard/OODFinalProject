@@ -41,17 +41,12 @@ public class ImageLayer implements IImageLayer {
   }
 
   @Override
-  public boolean isEmptyLayer() {
-    return this.image == null && this.name == null && this.fileType == null;
-  }
-
-  @Override
   public ImageLayer makeCopy() {
     return new ImageLayer(this.image, this.name, this.fileType);
   }
 
   public Image getImage() {
-    return image;
+    return this.image;
   }
 
   @Override
@@ -100,6 +95,12 @@ public class ImageLayer implements IImageLayer {
   @Override
   public int getImageWidth() {
     return this.image.getWidth();
+  }
+
+
+  @Override
+  public boolean isEmptyLayer() {
+    return this.image == null && this.name == null && this.fileType == null;
   }
 
 }

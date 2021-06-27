@@ -1,4 +1,3 @@
-
 package view;
 
 import java.awt.image.BufferedImage;
